@@ -51,5 +51,19 @@ Aside from the genotype data, we need to generate gene expression data for assoc
 Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
 Using htseq-count to count expression on gene-basis. 
 
-## 
+## Association analysis between genotype and gene expression.
+We used MatrixeQTL for the association analysis between genotype and gene expression. 
+Inputs:
+- Genotype on recombination bins;
+- Gene expression of all isogenic pools.
+Command line:
+
+## For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
+1. First, we need to generate the a linkage measure for each bin to bin. 
+2. Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
+
+### In this step, we parsed the output of MatrixeQTL and only collected the most significant association for following check. 
+
+
+
 
