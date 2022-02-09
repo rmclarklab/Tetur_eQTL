@@ -1,6 +1,6 @@
 # Expression QTL (eQTL) of Tetranychus urticae
-This is a repo for the data analysis pipeline of Tetranychus urticae eQTL.
-eQTL analysis is an association analysis between genotype and gene expression.
+This is a repo for the data analysis pipeline of Tetranychus urticae eQTL. </br>
+eQTL is QTL explaining gene expression, can be identified via association analysis between genotype and gene expression.
 
 ## eQTL Project introduction
   To initiate eQTL project, we collected a total of 458 isogenic pools of the F3 T. urticae population. Briefly, a susceptible ROS-ITi and more resistant MR-VPi inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi strain. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool. 
