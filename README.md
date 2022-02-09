@@ -18,7 +18,7 @@ To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina D
 
 For each (no customized) step, you can refer to my other repo for detail. 
 
-### In this step, we get ready the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each F3 isogenic pool. 
+#### In this step, we get ready the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each F3 isogenic pool. 
 
 ## RNA-seq mapped against the reference genome. 
 Data processing step by mapping RNA-seq onto the same reference genome (T. . urticae, London strain). 
@@ -27,7 +27,7 @@ Data processing step by mapping RNA-seq onto the same reference genome (T. . urt
 
 To pipeline the mapping process, see here. 
 
-### In this step, we generated RNA-seq alignment file for each F3 isogenic pool in BAM format, which is required for the following analysis. 
+#### In this step, we generated RNA-seq alignment file for each F3 isogenic pool in BAM format, which is required for the following analysis. 
 
 ## Call genotype composition based on RNA-seq alignment.
 We developed a customized pipeline for the genotyping call of F3 isogenic pool in our study. 
@@ -44,7 +44,7 @@ Python with the following packages installed:
 2. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
 3. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
 
-### In this step, genotypes for individual F3 isogenic pools are generated. Genotype in recombination bin served as the representative genotype for following analysis. 
+#### In this step, genotypes for individual F3 isogenic pools are generated. Genotype in recombination bin served as the representative genotype for following analysis. 
 
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
@@ -64,7 +64,7 @@ For any significant associations, recombination bins that are physically linked 
 1. First, we need to generate the a linkage measure for each bin to bin. 
 2. Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
 
-### In this step, we parsed the output of MatrixeQTL and only collected the most significant association for following check. 
+#### In this step, we parsed the output of MatrixeQTL and only collected the most significant association for following check. 
 
 
 
