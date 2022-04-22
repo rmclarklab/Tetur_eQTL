@@ -1,4 +1,4 @@
-# Expression QTL (eQTL) of Tetranychus urticae (a generalist spider-mite herbivor)
+# Expression QTL (eQTL) of <i>Tetranychus urticae</i> (a generalist spider-mite herbivor)
 This is a repo for the data analysis pipeline of Tetranychus urticae eQTL project. </br>
 eQTL is QTL explaining gene expression, can be identified via association analysis between genotype and gene expression.
 
