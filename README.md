@@ -8,30 +8,29 @@ eQTL is QTL explaining gene expression, can be identified via association analys
   
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). 
-1. First, prepare index for the genome fasta file.
-2. Then, map DNA-seq onto fasta genome using BWA.
-3. Mark duplicated reads that are arised from PCR process.
-4. Using the Best practice of GATK for variant calling. 
-5. Filter SNP data for following processing.
-6. Use the custom script to filter SNPs in homozygous genotype (given the parental strains are pure inbred).
-7. (customized) To collect SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi).
+1. First, prepare index for the genome fasta file;
+2. Then, map DNA-seq onto the reference fasta genome using BWA;
+3. Mark duplicated reads that are arised from PCR process using picard MarkDuplicate;
+4. Using the Best practice of GATK for variant calling;
+5. Filter SNP data (use the custom script to filter SNPs in homozygous genotype);
+7. Collect SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi).
 
 For each (no customized) step, you can refer to my other repo for detail. 
 
-#### In this step, we get ready the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each F3 isogenic pool. 
+#### In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
 ## RNA-seq mapped against the reference genome. 
-Data processing step by mapping RNA-seq onto the same reference genome (T. . urticae, London strain). 
-1. First, prepare index file for the genome fasta file (no provided GTF, optional).
-2. Map RNA-seq onto reference genome given the index folder. 
+Data processing step by mapping RNA-seq onto the three-chromosome reference genome (same as we used for DNA-seq alignment). 
+1. First, prepare index file for the genome fasta file using STAR.
+2. Map RNA-seq onto reference genome given the index folder using STAR mapping. 
 
 To pipeline the mapping process, see here. 
 
-#### In this step, we generated RNA-seq alignment file for each F3 isogenic pool in BAM format, which is required for the following analysis. 
+#### In this step, we generated RNA-seq alignment file (BAM) for each RIL isogenic pool, which is required for the following analysis. 
 
 ## Call genotype composition based on RNA-seq alignment.
-We developed a customized pipeline for the genotyping call of F3 isogenic pool in our study. 
-Inputs:
+We developed a customized pipeline for the genotyping call of RIL isogenic pool in our study. 
+[[Inputs]]
 - BAM file in coordinates sorted fashion and its index file.
 - SNPs that are distinguishable between the two working inbred stains. 
 
