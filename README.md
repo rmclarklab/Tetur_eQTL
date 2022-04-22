@@ -1,13 +1,13 @@
-# Expression QTL (eQTL) of Tetranychus urticae
-This is a repo for the data analysis pipeline of Tetranychus urticae eQTL. </br>
+# Expression QTL (eQTL) of Tetranychus urticae (a generalist spider-mite herbivor)
+This is a repo for the data analysis pipeline of Tetranychus urticae eQTL project. </br>
 eQTL is QTL explaining gene expression, can be identified via association analysis between genotype and gene expression.
 
 ## eQTL Project introduction
-  To initiate eQTL project, we collected a total of 458 isogenic pools of the F3 T. urticae population. Briefly, a susceptible ROS-ITi and more resistant MR-VPi inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi strain. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool. 
-  Because the recombination events happended during F1 reproducing F2 male, the F3 populations have different genotypic compositions which provided the foundamental basis for eQTL analysis. RNA was extracted from individual F3 isogenic pool, and RNA-seq was utilized for genotyping identification (See below for detail). 
+  To initiate eQTL project, we collected a total of 458 isogenic pools of the recombinant inbred lines (RIL). Briefly, a susceptible ROS-ITi (diploid mother, ♀) and more resistant MR-VPi (haploid father, ♂) inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi strain. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool. 
+  Because the recombination events happended during F1 reproducing F2 male, the  RILs have different genotypic compositions which provided the foundamental basis for eQTL analysis. RNA was extracted from individual RIL isogenic populations, which are used for genotyping and phenotyping (phenotype data is gene expression level, See below for detail). 
   
 ## DNA-seq for variants calling
-To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the reference genome (T. urticae, London strain). 
+To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). 
 1. First, prepare index for the genome fasta file.
 2. Then, map DNA-seq onto fasta genome using BWA.
 3. Mark duplicated reads that are arised from PCR process.
