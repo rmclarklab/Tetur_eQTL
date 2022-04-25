@@ -8,7 +8,7 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
-GATK best practice for variants calling is refered to, [see](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
+GATK best practice for variants calling is refered [here](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
 1. First, prepare index for the genome fasta file;
 ```bash
 # make directory for bwa index files
@@ -49,6 +49,7 @@ gatk GenotypeGVCFs -R Tetranychus_urticae_2017.11.21.fasta -V MR-VP.g.vcf.gz -O 
 ```
 5. Select variants data in unfiltered vcf file;
 ```bash
+### run the following steps for ROS-ITi and MR-VPi, respectively
 # select SNPs
 gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include SNP -O SNP.vcf.gz
 # select INDELs (insertion and deletion, optional)
