@@ -7,9 +7,9 @@ eQTL is QTL explaining gene expression, can be identified via association analys
   Because the recombination events happended during F1 reproducing F2 male, the  RILs have different genotypic compositions which provided the foundamental basis for eQTL analysis. RNA was extracted from individual RIL isogenic populations, which are used for genotyping and phenotyping (phenotype data is gene expression level, See below for detail). 
 
 ## DNA-seq for variants calling
-To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). 
-1. First, prepare index for the genome fasta file; <br>
-
+To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
+GATK best practice for variants calling is refered to, [see](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
+1. First, prepare index for the genome fasta file;
 ```bash
 # make directory for bwa index files
 mkdir bwa_index
@@ -29,16 +29,39 @@ bwa mem -t 20 -R "@RG\tID:20190412_8\tSM:ROS-ITi\tPL:Illumina\tLB:ROS-ITi" bwa_i
 # run bwa mapping for MR-VPi sample (paired-end DNA sequences)
 bwa mem -t 20 -R "@RG\tID:20190312\tSM:MR-VPi\tPL:Illumina\tLB:MR-VPi" bwa_index/Tetranychus_urticae_2017.11.21.fasta r1.fastq.gz r2.fastq.gz | samtools view -Su - | samtools sort -@ 20 - -o MR-VPi.BWA.bam
 ```
-3. Mark duplicated reads that are arised from PCR process using picard MarkDuplicate;
+3. Mark duplicated reads that are arised from PCR using picard MarkDuplicate;
 ```bash
-picard MarkDuplicates I=MR-VP-Inb2Tetur.BWA.bam O=./temp/MR-VP-Inb2Tetur_duplicate.bam M=./output/MR-VP-Inb2Tetur_metrics.txt && samtools index ./temp/MR-VP-Inb2Tetur_duplicate.bam
-4. Using the Best practice of GATK for variant calling;
+# mark duplicated reads in BWA mapping files
+picard MarkDuplicates I=ROS-ITi.BWA.bam O=ROS-IT_duplicate.bam M=ROS-IT_metrics.txt && samtools index ROS-IT_duplicate.bam
+picard MarkDuplicates I=MR-VPi.BWA.bam O=MR-VP_duplicate.bam M=MR-VP_metrics.txt && samtools index MR-VP_duplicate.bam
+# left align insertion and deletion mappings (optional)
+gatk LeftAlignIndels -R Tetranychus_urticae_2017.11.21.fasta -I ROS-IT_duplicate.bam -O ROS-IT_leftalign.bam
+gatk LeftAlignIndels -R Tetranychus_urticae_2017.11.21.fasta -I MR-VP_duplicate.bam -O MR-VP_leftalign.bam
 ```
-5. Filter SNP data (use the custom script to filter SNPs in homozygous genotype);
+4. Run the Best practice of GATK pipeline for variant calling;
+```bash
+# run gatk HaplotypeCaller to generate g.vcf file
+gatk HaplotypeCaller -R Tetranychus_urticae_2017.11.21.fasta -I ROS-IT_leftalign.bam -ERC GVCF -O ROS-IT.g.vcf.gz
+gatk HaplotypeCaller -R Tetranychus_urticae_2017.11.21.fasta -I MR-VP_leftalign.bam -ERC GVCF -O MR-VP.g.vcf.gz
+# run gatk GenotypeGVCFs to call variants in vcf file
+gatk GenotypeGVCFs -R Tetranychus_urticae_2017.11.21.fasta -V ROS-IT.g.vcf.gz -O ROS-IT.vcf.gz
+gatk GenotypeGVCFs -R Tetranychus_urticae_2017.11.21.fasta -V MR-VP.g.vcf.gz -O MR-VP.vcf.gz
+```
+5. Select variants data in unfiltered vcf file;
+```bash
+# select SNPs
+gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include SNP -O output.SNP.SNP.vcf.gz
+# select INDELs (insertion and deletion, optional)
+gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include INDEL -O output.INDEL.vcf.gz
+# Filter SNPs based on RMS mapping quality and genotype field information
+
+```
+For Variants filtering, [see](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
 
 7. Collect SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi).
+```bash
 
-For each (no customized) step, you can refer to my other repo for detail. 
+```
 
 ## Update GFF3 file for the reference genome
 To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
