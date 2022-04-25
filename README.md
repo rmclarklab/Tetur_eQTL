@@ -50,11 +50,15 @@ gatk GenotypeGVCFs -R Tetranychus_urticae_2017.11.21.fasta -V MR-VP.g.vcf.gz -O 
 5. Select variants data in unfiltered vcf file;
 ```bash
 # select SNPs
-gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include SNP -O output.SNP.SNP.vcf.gz
+gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include SNP -O SNP.vcf.gz
 # select INDELs (insertion and deletion, optional)
-gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include INDEL -O output.INDEL.vcf.gz
-# Filter SNPs based on RMS mapping quality and genotype field information
-
+gatk SelectVariants -R Tetranychus_urticae_2017.11.21.fasta -V input.vcf.gz -select-type-to-include INDEL -O INDEL.vcf.gz
+# sort vcf files
+bcftools sort -o sorted.vcf.gz -O z SNP.vcf.gz
+# add index for sorted vcf file
+bcftools index -t sorted.vcf.gz
+# Filter SNPs based on RMS mapping quality and genotype field information (run script vcf_pass.py)
+vcf_pass.py -vcf sorted.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O filtered.vcf.gz
 ```
 For Variants filtering, [see](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
 
