@@ -63,9 +63,10 @@ vcf_pass.py -vcf sorted.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O filter
 ```
 For Variants filtering, [see](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
 
-7. Collect SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi).
+7. Pick SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi). Output in tab-separated file
 ```bash
-
+# Comparing filtered VCF files for ROS-IT and MR-VP, and pick genotype-calls different between them
+vcf_compare.py -vcf1 ROS-IT.filtered.vcf.gz -vcf2 MR-VP.filtered.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O variant_ROSIT.vs.MRVP
 ```
 
 ## Update GFF3 file for the reference genome
