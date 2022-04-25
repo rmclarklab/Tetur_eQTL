@@ -8,11 +8,34 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). 
-1. First, prepare index for the genome fasta file;
-2. Then, map DNA-seq onto the reference fasta genome using BWA;
+1. First, prepare index for the genome fasta file; <br>
+
+```bash
+# make directory for bwa index files
+mkdir bwa_index
+# change working directory to the folder
+cd bwa_index
+# generate index files using bwa index command
+bwa index Tetranychus_urticae_2017.11.21.fasta
+```
+2. Then, map DNA-seq of ROS-ITi and MR-VPi onto the reference fasta genome using BWA;
+```bash
+# make directory for bwa mapping
+mkdir bwa_map
+# change working directory to the mapping folder
+cd bwa_map
+# run bwa mapping for ROS-ITi sample (paired-end DNA sequences)
+bwa mem -t 20 -R "@RG\tID:20190412_8\tSM:ROS-ITi\tPL:Illumina\tLB:ROS-ITi" bwa_index/Tetranychus_urticae_2017.11.21.fasta r1.fastq.gz r2.fastq.gz | samtools view -Su - | samtools sort -@ 20 - -o ROS-ITi.BWA.bam
+# run bwa mapping for MR-VPi sample (paired-end DNA sequences)
+bwa mem -t 20 -R "@RG\tID:20190312\tSM:MR-VPi\tPL:Illumina\tLB:MR-VPi" bwa_index/Tetranychus_urticae_2017.11.21.fasta r1.fastq.gz r2.fastq.gz | samtools view -Su - | samtools sort -@ 20 - -o MR-VPi.BWA.bam
+```
 3. Mark duplicated reads that are arised from PCR process using picard MarkDuplicate;
+```bash
+picard MarkDuplicates I=MR-VP-Inb2Tetur.BWA.bam O=./temp/MR-VP-Inb2Tetur_duplicate.bam M=./output/MR-VP-Inb2Tetur_metrics.txt && samtools index ./temp/MR-VP-Inb2Tetur_duplicate.bam
 4. Using the Best practice of GATK for variant calling;
+```
 5. Filter SNP data (use the custom script to filter SNPs in homozygous genotype);
+
 7. Collect SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi).
 
 For each (no customized) step, you can refer to my other repo for detail. 
@@ -21,7 +44,7 @@ For each (no customized) step, you can refer to my other repo for detail.
 To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
 
 
-#### In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
+In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
 ## RNA-seq mapped against the reference genome. 
 Data processing step by mapping RNA-seq onto the three-chromosome reference genome (same as we used for DNA-seq alignment). 
