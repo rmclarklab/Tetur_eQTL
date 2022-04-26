@@ -155,9 +155,9 @@ Rscript block_vis.R -geno sample_genotype_block.txt
 
 ## Update GFF3 file for the reference genome
 To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from Orcae database and updated the current GFF3 file. <br>
-To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script **restore_gff.py**. <br>
+To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```restore_gff.py```. <br>
 Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
-Transform from GFF3 to GTF format using script **gff2gtf.py**.
+Transform from GFF3 to GTF format using script ```gff2gtf.py```.
 ```bash
 # sort gff using gff3sort.pl
 gff3sort.pl input.gff > output.gff
@@ -185,8 +185,10 @@ mv *.txt htseq_count_dir
 # Gene on row and sample on column
 htseq_merge.py -countdir htseq_count_dir -O all_sample_count
 ```
-2. 
+2. Standarize read-count by performing library size normalization and quantile normalization.
+```bash
 
+```
 3. 
 
 ## Significant association extraction
