@@ -173,7 +173,14 @@ tabix -p gff output.gff.gz
 # htseq-count command line
 htseq-count -f bam -r pos -s reverse -t exon --nonunique none sample_name.bam Tetur.gtf > sample_name.txt
 ```
-2. Perform differential expression analysis by giving the sample information and conditions in comparison
+2. To calculate gene expression abundance on transcript per million (TPM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
+```bash
+# prepare reference index for rsem expression calculation
+rsem-prepare-reference --gtf $GTF --star --star-sjdboverhang 150 $GENOME Tetur_rsem -p 20
+# calculate expression level using paired-end reads
+rsem-calculate-expression --star-gzipped-read-file --paired-end --star --forward-prob 0 -p 10 r1.fastq.gz r2.fastq.gz Tetur_rsem sample_name
+```
+3. Perform differential expression analysis by giving the sample information and conditions in comparison
 ```bash
 
 ```
