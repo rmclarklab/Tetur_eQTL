@@ -11,7 +11,10 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - [DNA-seq for variants calling](#DNA-seq-for-variants-calling)
 - [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
 - [Genotype call for RILs based on RNA-seq alignment](#Genotype-call-for-RILs-based-on-RNA-seq-alignment)
-- []()
+- [Update GFF3 file for the reference genome](#Update-GFF3-file-for-the-reference-genome)
+- [Gene expression level quantification](#Gene-expression-level-quantification)
+- [Association analysis between genotype and gene expression](Association-analysis-between-genotype-and-gene-expression)
+- 
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
@@ -132,7 +135,7 @@ mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
 3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
 
-See chisq_bad.Rmd
+  See chisq_bad.Rmd
 
 4. For raw allele-specific read count, clean the dataset by dropping bad SNPs from last step
 ```bash
@@ -165,14 +168,13 @@ tabix -p gff output.gff.gz
 ```
 
 ## Gene expression level quantification
-Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
-Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
-Using htseq-count to count expression on gene-basis. 
+By taking the updated GFF version, we run htseq-count on the alignment RNA-seq BAM files and output read count on gene basis.
+```bash
+# htseq-count command line
+htseq-count -f bam -r pos -s reverse -t exon --nonunique none sample_name.bam Tetur.gtf > sample_name.txt
+```
 
-
-
-
-## Association analysis between genotype and gene expression.
+## Association analysis between genotype and gene expression
 We used MatrixeQTL for the association analysis between genotype and gene expression. 
 Inputs:
 - Genotype on recombination bins;
