@@ -10,7 +10,8 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 - [DNA-seq for variants calling](#DNA-seq-for-variants-calling)
 - [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
-- 
+- [Genotype call for RILs based on RNA-seq alignment](#Genotype-call-for-RILs-based-on-RNA-seq-alignment)
+- []()
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
@@ -114,15 +115,19 @@ Inputs:
 - BAM file in coordinates sorted fashion and with its index file;
 - SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
 
-1. Processing SNPs genotype
+1. Count allele-specific reads on SNP sites
 ```bash
 # run genotype_allele.py to count allele-specifc reads on the SNP sites
 # this is a multiple-core processing program, adjust core usage via "-n"
-mpiexec -n 10 genotype_allele.py -variant variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
+mpiexec -n 10 genotype_allele.py -V variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
 ```
-2. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
+2. Call genotype based on 
+```bash
 
-3. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
+```
+3. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
+
+4. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
 
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
