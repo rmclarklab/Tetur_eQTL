@@ -69,6 +69,7 @@ bcftools index -t sorted.vcf.gz
 vcf_pass.py -vcf sorted.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O filtered.vcf.gz
 ```
 For Variants filtering, see [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. <br>
+
 6. Pick SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi). Output in tab-separated file
 ```bash
 # Comparing filtered VCF files for ROS-IT and MR-VP, and pick genotype-calls different between them
@@ -77,6 +78,7 @@ vcf_compare.py -vcf1 ROS-IT.filtered.vcf.gz -vcf2 MR-VP.filtered.vcf.gz -R Tetra
 ## Map RNA-seq against the reference genome
 The three-chromosome reference genome was used, the same for DNA-seq mapping. <br>
 We used two RNA-seq aligners, [STAR](https://github.com/alexdobin/STAR) and [GSNAP](https://github.com/juliangehring/GMAP-GSNAP), for RNA-seq mapping.
+
 1. Generate indices for genome fasta file.
 ```bash
 # STAR index generation
@@ -89,7 +91,7 @@ gmap_build -D GSNAP_index -d Tetur Tetranychus_urticae_2017.11.21.fasta
 # STAR mapping, sort and index BAM alignment file
 STAR --genomeDir STAR_index --runThreadN 20 --readFilesIn r1.fastq.gz r2.fastq.gz --twopassMode Basic --sjdbOverhang 99 --outFileNamePrefix sample_name. --readFilesCommand zcat --alignIntronMax 30000 --outSAMtype BAM Unsorted && samtools sort sample_name.Aligned.out.bam -o sample_name_sorted.bam -@ 8 && samtools index sample_name_sorted.bam 
 ```
-  - SNP-tolerant mapping using GSNAP require preparation of variant files
+  SNP-tolerant mapping using GSNAP require preparation of variant files
 ```bash
 # make folder for SNP data
 mkdir Tetur_SNP
@@ -129,7 +131,9 @@ After running for all samples, place all of them in the same folder (raw_count).
 mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
 3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
+
 See chisq_bad.Rmd
+
 4. For raw allele-specific read count, clean the dataset by dropping bad SNPs from last step
 ```bash
 # run clean_count.R script to drop SNP rows in bad_SNP file
@@ -146,13 +150,18 @@ genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.t
 Rscript block_vis.R -geno sample_genotype_block.txt
 ```
 
-## Gene expression quantification.
+## Update GFF3 file for the reference genome
+To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from Orcae database and updated the current GFF3 file. <br>
+To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script **restore_gff.py**. <br>
+Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
+Transform from GFF3 to GTF format using script **gff2gtf.py**.
+
+## Gene expression level quantification
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
 Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
 Using htseq-count to count expression on gene-basis. 
 
-## Update GFF3 file for the reference genome
-To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
+
 
 
 ## Association analysis between genotype and gene expression.
