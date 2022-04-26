@@ -201,9 +201,16 @@ Library size normalization was performed using [DESeq2](https://github.com/mikel
 
 [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
-3. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. <br> <img width="726" alt="Screen Shot 2022-04-25 at 10 26 13 PM" src="https://user-images.githubusercontent.com/63678158/165221203-5fbca0b2-763d-43af-b1f0-52e3a5307ef0.png">
+3. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. For the identified genotype-blocks of each sample (output of genotype_block.py, see above), place all of samples in the same folder.
 ```bash
+# make directory for all samples' genotype block information
+mkdir sample_genotype_block
+# move genotype_block to the directory
+mv sample_genotype_block*.txt sample_genotype_block/
+# prepare SNP location file for bin assignment (if no SNPs in one overlapped region, no bins assigned)
 
+# run block2bin.R to pick the representative SNPs of each overlapped blocks
+Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
 4. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
