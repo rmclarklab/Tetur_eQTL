@@ -6,6 +6,11 @@ eQTL is QTL explaining gene expression, can be identified via association analys
   To initiate eQTL project, we collected a total of 458 isogenic pools of the recombinant inbred lines (RIL). Briefly, a susceptible ROS-ITi (diploid mother, ♀) and more resistant MR-VPi (haploid father, ♂) inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi strain. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool. 
   Because the recombination events happended during F1 reproducing F2 male, the  RILs have different genotypic compositions which provided the foundamental basis for eQTL analysis. RNA was extracted from individual RIL isogenic populations, which are used for genotyping and phenotyping (phenotype data is gene expression level, See below for detail). 
 
+## Procedure
+
+[DNA-seq for variants calling](## DNA-seq for variants calling)
+[Map RNA-seq against the reference genome](## Map RNA-seq against the reference genome)
+
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
 GATK best practice for variants calling is refered [here](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
@@ -75,12 +80,29 @@ To integrate all annotated genes in the current reference genome, we provided a 
 
 In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
-## RNA-seq mapped against the reference genome. 
-Data processing step by mapping RNA-seq onto the three-chromosome reference genome (same as we used for DNA-seq alignment). 
-1. First, prepare index file for the genome fasta file using STAR.
-2. Map RNA-seq onto reference genome given the index folder using STAR mapping. 
+## Map RNA-seq against the reference genome
+The three-chromosome reference genome was used, the same for DNA-seq mapping. <br>
+We used two RNA-seq aligners, [STAR](https://github.com/alexdobin/STAR) and [GSNAP](https://github.com/juliangehring/GMAP-GSNAP), for RNA-seq mapping.
+1. Generate indices for genome fasta file.
+```bash
+# STAR index generation
+STAR --runMode genomeGenerate --runThreadN 30 --genomeDir STAR_index --genomeFastaFiles Tetranychus_urticae_2017.11.21.fasta --genomeSAindexNbases 12
+# GSNAP index generation
+gmap_build -D GSNAP_index -d Tetur Tetranychus_urticae_2017.11.21.fasta
+```
+2. Map RNA-seq onto the reference genome given the index folder. 
+```bash
+# STAR mapping, sort and index BAM alignment file
+STAR --genomeDir STAR_index --runThreadN 20 --readFilesIn r1.fastq.gz r2.fastq.gz --twopassMode Basic --sjdbOverhang 99 --outFileNamePrefix sample_name. --readFilesCommand zcat --alignIntronMax 30000 --outSAMtype BAM Unsorted && samtools sort sample_name.Aligned.out.bam -o sample_name_sorted.bam -@ 8 && samtools index sample_name_sorted.bam 
+```
+SNP-tolerant mapping using GSNAP require preparation of variant files
+```bash
+# Format SNP allele information from vcf_compare.py output (see above)
 
-To pipeline the mapping process, see here. 
+# GSNAP mapping
+gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A sam r1.fastq.gz r2.fastq.gz | samtools sort -o sample_name.bam -O bam -@ 20 - && samtools index sample_name.bam
+```
+To pipeline the mapping process, see [star_mapping.py]. 
 
 #### In this step, we generated RNA-seq alignment file (BAM) for each RIL isogenic pool, which is required for the following analysis. 
 
