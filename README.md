@@ -189,7 +189,8 @@ htseq_merge.py -countdir htseq_count_dir -O all_sample_count
 
 Library size normalization was performed using [DESeq2](https://github.com/mikelove/DESeq2). For running script, see ```htseq_norm.Rmd``` <br>
 
-3. 
+3. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks ([see]()). 
+
 
 4. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
