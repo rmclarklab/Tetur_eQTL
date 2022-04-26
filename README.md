@@ -8,8 +8,8 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 ## Procedure
 
-[DNA-seq for variants calling](#DNA-seq-for-variants-calling)
-[Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
+- [DNA-seq for variants calling](#DNA-seq-for-variants-calling)
+- [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
@@ -74,12 +74,6 @@ For Variants filtering, [see](https://gatk.broadinstitute.org/hc/en-us/articles/
 vcf_compare.py -vcf1 ROS-IT.filtered.vcf.gz -vcf2 MR-VP.filtered.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O variant_ROSIT.vs.MRVP
 ```
 
-## Update GFF3 file for the reference genome
-To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
-
-
-In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
-
 ## Map RNA-seq against the reference genome
 The three-chromosome reference genome was used, the same for DNA-seq mapping. <br>
 We used two RNA-seq aligners, [STAR](https://github.com/alexdobin/STAR) and [GSNAP](https://github.com/juliangehring/GMAP-GSNAP), for RNA-seq mapping.
@@ -105,6 +99,12 @@ gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A
 To pipeline the mapping process, see [star_mapping.py]. 
 
 #### In this step, we generated RNA-seq alignment file (BAM) for each RIL isogenic pool, which is required for the following analysis. 
+
+## Update GFF3 file for the reference genome
+To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
+
+
+In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
 ## Call genotype composition based on RNA-seq alignment.
 We developed a customized pipeline for the genotyping call of RIL isogenic pool in our study. 
