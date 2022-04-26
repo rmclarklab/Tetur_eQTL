@@ -155,6 +155,14 @@ To integrate all annotated gene information in the current three-chromosome refe
 To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script **restore_gff.py**. <br>
 Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
 Transform from GFF3 to GTF format using script **gff2gtf.py**.
+```bash
+# sort gff using gff3sort.pl
+gff3sort.pl input.gff > output.gff
+# compress gff
+bgzip output.gff
+# add index for compressed gff
+tabix -p gff output.gff.gz
+```
 
 ## Gene expression level quantification
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
