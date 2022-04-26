@@ -1,4 +1,4 @@
-# Expression QTL (eQTL) of <i>Tetranychus urticae</i> (a generalist spider-mite herbivor)
+# Expression QTL (eQTL) of <i>Tetranychus urticae</i> (a generalist spider-mite herbivore)
 This is a repo for the data analysis pipeline of Tetranychus urticae eQTL project. </br>
 eQTL is QTL explaining gene expression, can be identified via association analysis between genotype and gene expression.
 
@@ -135,7 +135,7 @@ mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
 3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
 
-  See chisq_bad.Rmd
+    See chisq_bad.Rmd
 
 4. For raw allele-specific read count, clean the dataset by dropping bad SNPs from last step
 ```bash
@@ -185,11 +185,13 @@ mv *.txt htseq_count_dir
 # Gene on row and sample on column
 htseq_merge.py -countdir htseq_count_dir -O all_sample_count
 ```
-2. Standarize read-count by performing library size normalization and quantile normalization.
-```bash
+2. Standarize read-count by performing library size normalization and quantile normalization. 
 
-```
-3. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
+Library size normalization was performed using [DESeq2](https://github.com/mikelove/DESeq2). For running script, see ```htseq_norm.Rmd``` <br>
+
+3. 
+
+4. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
 First, we need to generate the a linkage measure for each bin to bin. 
 Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
