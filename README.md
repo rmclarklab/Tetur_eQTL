@@ -115,14 +115,17 @@ Inputs:
 - BAM file in coordinates sorted fashion and with its index file;
 - SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
 
-1. Count allele-specific reads on SNP sites
+1. Count allele-specific reads on SNP sites for each sample separately
 ```bash
 # run genotype_allele.py to count allele-specifc reads on the SNP sites
 # this is a multiple-core processing program, adjust core usage via "-n"
 mpiexec -n 10 genotype_allele.py -V variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
 ```
-2. Call genotype based on 
+After running for all samples, place all of them in the same folder (raw_count).
+2. Call genotype based on allele-specific read count 
 ```bash
+# run genotype_caller.py for genotype calling, either in homozygous or heterozygous genotype
+# this is a multiple-core processing program, adjust core usage via "-n"
 
 ```
 3. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
