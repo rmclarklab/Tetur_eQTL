@@ -11,7 +11,7 @@ def args_parser():
     '''parser the argument from terminal command'''
     parser=argparse.ArgumentParser(prog = "PROG", formatter_class = argparse.RawDescriptionHelpFormatter, description="Allele-specifi read count at retrieved SNP positions. \n \
         Usage: mpiexec -n <cores> genotype_allele.py -variant <var> -bam <bam> -O <output> ")
-    parser.add_argument("-variant", "--variant", help = "variant table with reference and multiple alternative alleles with their position in 1-basis. ")
+    parser.add_argument("-V", "--variant", help = "variant table with reference and multiple alternative alleles with their position in 1-basis. ")
     parser.add_argument("-bam", "--bam", help = "the sorted bam with index file in the same directory. ")
     parser.add_argument("-O", "--output", help = "Output name of the read count at allele positions. ")
     args = parser.parse_args()
