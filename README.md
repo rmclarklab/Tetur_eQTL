@@ -8,8 +8,8 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 ## Procedure
 
-[DNA-seq for variants calling](## DNA-seq for variants calling)
-[Map RNA-seq against the reference genome](## Map RNA-seq against the reference genome)
+[DNA-seq for variants calling](##DNA-seq for variants calling)
+[Map RNA-seq against the reference genome](##Map RNA-seq against the reference genome)
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
