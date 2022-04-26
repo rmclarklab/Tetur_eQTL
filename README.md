@@ -175,11 +175,19 @@ htseq-count -f bam -r pos -s reverse -t exon --nonunique none sample_name.bam Te
 ```
 
 ## Association analysis between genotype and gene expression
-We used MatrixeQTL for the association analysis between genotype and gene expression. 
-Inputs:
-- Genotype on recombination bins;
-- Gene expression of all isogenic pools.
-Command line:
+For each samples, its genotype blocks and gene expression data are available.
+1. Merge htseq-count files for all samples into one single file
+```bash
+# make directory for htseq-count data of all samples
+mkdir htseq_count_dir
+# place all samples htseq-count output under the htseq_count_dir
+mv *.txt htseq_count_dir
+# Gene on row and sample on column
+htseq_merge.py -countdir htseq_count_dir -O all_sample_count
+```
+2. 
+
+3. 
 
 ## Significant association extraction
 For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
