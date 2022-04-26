@@ -68,7 +68,7 @@ bcftools index -t sorted.vcf.gz
 # Filter SNPs based on RMS mapping quality and genotype field information (run script vcf_pass.py)
 vcf_pass.py -vcf sorted.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O filtered.vcf.gz
 ```
-For Variants filtering, see [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
+For Variants filtering, see [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. <br>
 6. Pick SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi). Output in tab-separated file
 ```bash
 # Comparing filtered VCF files for ROS-IT and MR-VP, and pick genotype-calls different between them
@@ -112,8 +112,8 @@ gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A
 ## Genotype call for RILs based on RNA-seq alignment
 We developed a customized pipeline for genotyping purposes of RIL isogenic pools. 
 Inputs:
-- BAM file in coordinates sorted fashion and with its index file;
-- SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
+  - BAM file in coordinates sorted fashion and with its index file;
+  - SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
 
 1. Count allele-specific reads on SNP sites for each sample separately
 ```bash
@@ -136,9 +136,10 @@ See chisq_bad.Rmd
 Rscript clean_count.R -raw sample_allele_count.txt -bad bad_SNPs.txt -O sample_allele_count.clean.txt
 ```
 5. Call genotypic blocks based on allele-specific read count of good SNPs 
+You need to set up the chromosomes of interested for genotype block assignment, and also provide chromosome length information in a tab-separated file. About how to provide chromosome length, see [here]().
 ```bash
 # run genotype_block.py to call genotype blocks that arised from crossingover events 
-
+genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.txt -O sample_genotype
 ```
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
