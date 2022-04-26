@@ -89,33 +89,31 @@ gmap_build -D GSNAP_index -d Tetur Tetranychus_urticae_2017.11.21.fasta
 # STAR mapping, sort and index BAM alignment file
 STAR --genomeDir STAR_index --runThreadN 20 --readFilesIn r1.fastq.gz r2.fastq.gz --twopassMode Basic --sjdbOverhang 99 --outFileNamePrefix sample_name. --readFilesCommand zcat --alignIntronMax 30000 --outSAMtype BAM Unsorted && samtools sort sample_name.Aligned.out.bam -o sample_name_sorted.bam -@ 8 && samtools index sample_name_sorted.bam 
 ```
-SNP-tolerant mapping using GSNAP require preparation of variant files
+  - SNP-tolerant mapping using GSNAP require preparation of variant files
 ```bash
-# Format SNP allele information from vcf_compare.py output (see above)
-
-# GSNAP mapping
+# make folder for SNP data
+mkdir Tetur_SNP
+# Format SNP allele information from vcf_compare.py output (see above) using SNP_prep.py
+# SNP_prep.py [input] [output]
+SNP_prep.py variant_ROSIT.vs.MRVP.txt SNP_allele
+# Prepare SNP information for GSNAP
+cat SNP_allele.txt | iit_store -o SNP_allele
+mv SNP_allele.iit Tetur_SNP/Tetur_SNP.maps
+# create a reference space index and compressed genome
+snpindex -d Tetur_SNP -v SNP_allele -D . -V .
+# prepare know splice sites 
+cat gtf_file | gtf_splicesites > Tu.splicesites
+cat gtf_file | gtf_introns > Tu.introns
+cat Tu.splicesites | iit_store -o Tu_splicesites
+cat Tu.introns | iit_store -o Tu_introns
+# move all generated file into genome index db, then run GSNAP mapping
 gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A sam r1.fastq.gz r2.fastq.gz | samtools sort -o sample_name.bam -O bam -@ 20 - && samtools index sample_name.bam
 ```
-To pipeline the mapping process, see [star_mapping.py]. 
-
-#### In this step, we generated RNA-seq alignment file (BAM) for each RIL isogenic pool, which is required for the following analysis. 
-
-## Update GFF3 file for the reference genome
-To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
-
-
-In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
-
-## Call genotype composition based on RNA-seq alignment.
-We developed a customized pipeline for the genotyping call of RIL isogenic pool in our study. 
-[[Inputs]]
-- BAM file in coordinates sorted fashion and its index file.
-- SNPs that are distinguishable between the two working inbred stains. 
-
-Python with the following packages installed:
-- pysam
-- pandas
-- mpi4py (to support multi-core running)
+## Genotype call for RILs based on RNA-seq alignment
+We developed a customized pipeline for genotyping purposes of RIL isogenic pools. 
+Inputs:
+- BAM file in coordinates sorted fashion and with its index file;
+- SNPs information that are distinguishable between the two inbred stains.
 
 1. Processing SNPs genotype
 2. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
@@ -127,6 +125,12 @@ Python with the following packages installed:
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
 Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
 Using htseq-count to count expression on gene-basis. 
+
+## Update GFF3 file for the reference genome
+To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
+
+
+In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
 ## Association analysis between genotype and gene expression.
 We used MatrixeQTL for the association analysis between genotype and gene expression. 
