@@ -122,11 +122,11 @@ Inputs:
 mpiexec -n 10 genotype_allele.py -V variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
 ```
 After running for all samples, place all of them in the same folder (raw_count).
-2. Call genotype based on allele-specific read count 
+2. Collect genotype information for all samples, and count the genotype frequency at each SNP site  
 ```bash
-# run genotype_caller.py for genotype calling, either in homozygous or heterozygous genotype
+# run genotype_freq.py for genotype frequency, either in homozygous or heterozygous genotype
 # this is a multiple-core processing program, adjust core usage via "-n"
-
+mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
 3. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
 
