@@ -128,9 +128,14 @@ After running for all samples, place all of them in the same folder (raw_count).
 # this is a multiple-core processing program, adjust core usage via "-n"
 mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
-3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter BAD SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
+3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
 See chisq_bad.Rmd
-4. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
+4. For raw allele-specific read count, clean the dataset by dropping bad SNPs from last step
+```bash
+# run clean_count.R script to drop SNP rows in bad_SNP file
+Rscript clean_count.R -raw sample_allele_count.txt -bad bad_SNPs.txt -O sample_allele_count.clean.txt
+```
+5. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
 
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
