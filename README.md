@@ -135,8 +135,11 @@ See chisq_bad.Rmd
 # run clean_count.R script to drop SNP rows in bad_SNP file
 Rscript clean_count.R -raw sample_allele_count.txt -bad bad_SNPs.txt -O sample_allele_count.clean.txt
 ```
-5. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
+5. Call genotypic blocks based on allele-specific read count of good SNPs 
+```bash
+# run genotype_block.py to call genotype blocks that arised from crossingover events 
 
+```
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
 Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
