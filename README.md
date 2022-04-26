@@ -136,11 +136,16 @@ See chisq_bad.Rmd
 Rscript clean_count.R -raw sample_allele_count.txt -bad bad_SNPs.txt -O sample_allele_count.clean.txt
 ```
 5. Call genotypic blocks based on allele-specific read count of good SNPs 
-You need to set up the chromosomes of interested for genotype block assignment, and also provide chromosome length information in a tab-separated file. About how to provide chromosome length, see [here]().
+You need to set up the chromosomes of interested for genotype block assignment, and also provide chromosome length information in a tab-separated file. About how to provide chromosome length, see [here](https://biopython.org/docs/1.75/api/Bio.SeqIO.html). Example data set see under data folder.
 ```bash
 # run genotype_block.py to call genotype blocks that arised from crossingover events 
-genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.txt -O sample_genotype
+genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.txt -O sample_genotype_block
 ```
+6. Visulization of genotype blocks on chromosome level
+```bash
+Rscript block_vis.R -geno sample_genotype_block.txt
+```
+
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
 Here, we still use the RNA-seq alignment file in BAM format for quantify gene expression. 
