@@ -167,13 +167,16 @@ bgzip output.gff
 tabix -p gff output.gff.gz
 ```
 
-## Gene expression level quantification
-By taking the updated GFF version, we run htseq-count on the alignment RNA-seq BAM files and output read count on gene basis.
+## Gene expression level quantification and differential gene expression analysis
+1. By taking the updated GFF version, we run htseq-count on the alignment RNA-seq BAM files and output read count on gene basis.
 ```bash
 # htseq-count command line
 htseq-count -f bam -r pos -s reverse -t exon --nonunique none sample_name.bam Tetur.gtf > sample_name.txt
 ```
+2. Perform differential expression analysis by giving the sample information and conditions in comparison
+```bash
 
+```
 ## Association analysis between genotype and gene expression
 For each samples, its genotype blocks and gene expression data are available.
 1. Merge htseq-count files for all samples into one single file
