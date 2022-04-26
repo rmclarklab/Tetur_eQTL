@@ -16,6 +16,15 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - [Association analysis between genotype and gene expression](Association-analysis-between-genotype-and-gene-expression)
 - 
 
+## Programs
+
+- python3+ (packages: pysam v0.15.3; biopython v1.76; pandas v0.25; numpy v1.21; mpi4py v3.0)
+- BWA v0.7.17-r1188
+- STAR v2.7.3a
+- GATK v4.0
+- GSNAP version 2020-06-30
+- 
+
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
 GATK best practice for variants calling is refered [here](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
