@@ -192,12 +192,14 @@ For each samples, its genotype blocks and gene expression data are available.
 mkdir htseq_count_dir
 # place all samples htseq-count output under the htseq_count_dir
 mv *.txt htseq_count_dir
-# Gene on row and sample on column
+# To merge all counts with genes on rows and samples on columns
 htseq_merge.py -countdir htseq_count_dir -O all_sample_count
 ```
 2. Standarize read-count by performing library size normalization and quantile normalization. 
 
-Library size normalization was performed using [DESeq2](https://github.com/mikelove/DESeq2). For running script, see ```htseq_norm.Rmd``` <br>
+Library size normalization was performed using [DESeq2](https://github.com/mikelove/DESeq2). For running script, see ```count_norm.R``` <br>
+
+[NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
 3. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. <br> <img width="726" alt="Screen Shot 2022-04-25 at 10 26 13 PM" src="https://user-images.githubusercontent.com/63678158/165221203-5fbca0b2-763d-43af-b1f0-52e3a5307ef0.png">
 ```bash
