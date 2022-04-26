@@ -10,6 +10,7 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 
 - [DNA-seq for variants calling](#DNA-seq-for-variants-calling)
 - [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
+- 
 
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
@@ -66,14 +67,12 @@ bcftools index -t sorted.vcf.gz
 # Filter SNPs based on RMS mapping quality and genotype field information (run script vcf_pass.py)
 vcf_pass.py -vcf sorted.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O filtered.vcf.gz
 ```
-For Variants filtering, [see](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
-
-7. Pick SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi). Output in tab-separated file
+For Variants filtering, see [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants) also for hard-filtering. 
+6. Pick SNPs that are distinguishable between the two inbred parental strains (ROS-ITi vs. MR-VPi). Output in tab-separated file
 ```bash
 # Comparing filtered VCF files for ROS-IT and MR-VP, and pick genotype-calls different between them
 vcf_compare.py -vcf1 ROS-IT.filtered.vcf.gz -vcf2 MR-VP.filtered.vcf.gz -R Tetranychus_urticae_2017.11.21.fasta -O variant_ROSIT.vs.MRVP
 ```
-
 ## Map RNA-seq against the reference genome
 The three-chromosome reference genome was used, the same for DNA-seq mapping. <br>
 We used two RNA-seq aligners, [STAR](https://github.com/alexdobin/STAR) and [GSNAP](https://github.com/juliangehring/GMAP-GSNAP), for RNA-seq mapping.
@@ -113,13 +112,17 @@ gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A
 We developed a customized pipeline for genotyping purposes of RIL isogenic pools. 
 Inputs:
 - BAM file in coordinates sorted fashion and with its index file;
-- SNPs information that are distinguishable between the two inbred stains.
+- SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
 
 1. Processing SNPs genotype
+```bash
+# run genotype_allele.py to count allele-specifc reads on the SNP sites
+# this is a multiple-core processing program, adjust core usage via "-n"
+mpiexec -n 10 genotype_allele.py -variant variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
+```
 2. Filter noises in SNP genotype call, and call genotype blocks for each isogenic pool
-3. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
 
-#### In this step, genotypes for individual F3 isogenic pools are generated. Genotype in recombination bin served as the representative genotype for following analysis. 
+3. Combine all isogenic pool genotypic blocks, and generate recombination bin for following association analysis. 
 
 ## Gene expression quantification.
 Aside from the genotype data, we need to generate gene expression data for association analysis between them. 
@@ -129,8 +132,6 @@ Using htseq-count to count expression on gene-basis.
 ## Update GFF3 file for the reference genome
 To integrate all annotated genes in the current reference genome, we provided a newer version of GFF3 annotation file for the working reference genome. 
 
-
-In this step, we prepared the standard VCF file. SNPs in VCF file are used as diagnosable signal for the genotype call of RNA-seq of each RIL isogenic pools. 
 
 ## Association analysis between genotype and gene expression.
 We used MatrixeQTL for the association analysis between genotype and gene expression. 
@@ -144,9 +145,6 @@ For any significant associations, recombination bins that are physically linked 
 
 1. First, we need to generate the a linkage measure for each bin to bin. 
 2. Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
-
-#### In this step, we parsed the output of MatrixeQTL and only collected the most significant association for following check. 
-
 
 
 
