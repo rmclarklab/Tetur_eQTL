@@ -144,7 +144,7 @@ mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
 3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
 
-    See chisq_bad.Rmd
+    See ```chisq_bad.Rmd```
 
 4. For raw allele-specific read count, clean the dataset by dropping bad SNPs from last step
 ```bash
