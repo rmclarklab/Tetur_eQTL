@@ -24,6 +24,8 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - GATK v4.0
 - GSNAP version 2020-06-30
 - htseq-count v2.0.1
+- RSEM v1.3.3
+- R v4.1.3 ()
 - 
 
 ## DNA-seq for variants calling
@@ -137,6 +139,7 @@ Inputs:
 mpiexec -n 10 genotype_allele.py -V variant_ROSIT.vs.MRVP.txt -bam sample_name.bam -O sample_allele_count
 ```
 After running for all samples, place all of them in the same folder (raw_count). <br>
+
 2. Collect genotype information for all samples, and count the genotype frequency at each SNP site  
 ```bash
 # run genotype_freq.py for genotype frequency, either in homozygous or heterozygous genotype
@@ -178,17 +181,17 @@ tabix -p gff output.gff.gz
 ```
 
 ## Gene expression level quantification and differential gene expression analysis
-1. By taking the updated GFF version, we run htseq-count on the alignment RNA-seq BAM files and output read count on gene basis.
+1. By taking the updated GFF version, we run htseq-count on the RNA-seq alignment BAM files and output read count on gene basis.
 ```bash
-# htseq-count command line
-htseq-count -f bam -r pos -s reverse -t exon --nonunique none sample_name.bam Tetur.gtf > sample_name.txt
+# htseq-count command line (adjust number of CPU "-n" based on sample BAMs number, per BAM per CPU)
+htseq-count -r pos -s reverse -t exon -i gene_id --nonunique none --with-header -n 3 -c sample1_3.txt sample1.bam sample2.bam sample3.bam $GTF 
 ```
 2. To calculate gene expression abundance on transcript per million (TPM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
 ```bash
 # prepare reference index for rsem expression calculation
 rsem-prepare-reference --gtf $GTF --star --star-sjdboverhang 150 $GENOME Tetur_rsem -p 20
 # calculate expression level using paired-end reads
-rsem-calculate-expression --star-gzipped-read-file --paired-end --star --forward-prob 0 -p 10 r1.fastq.gz r2.fastq.gz Tetur_rsem sample_name
+rsem-calculate-expression --star-gzipped-read-file --paired-end --star --strandedness reverse -p 10 r1.fastq.gz r2.fastq.gz Tetur_rsem sample_name
 ```
 3. Perform differential expression analysis by giving the sample information and conditions in comparison
 ```bash
@@ -222,7 +225,10 @@ mv sample_genotype_block*.txt sample_genotype_block/
 # run block2bin.R to pick the representative SNPs of each overlapped blocks
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
-4. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
+4. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
+Commanda used for association analysis, please see ```teset```
+
+5. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
 First, we need to generate the a linkage measure for each bin to bin. 
 Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
