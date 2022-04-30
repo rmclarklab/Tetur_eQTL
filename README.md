@@ -25,7 +25,7 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - GSNAP version 2020-06-30
 - htseq-count v2.0.1
 - RSEM v1.3.3
-- R v4.1.3 ()
+- R v4.1.3 (packages: DESeq2 v1.34; MatrixEQTL v2.3; )
 - 
 
 ## DNA-seq for variants calling
