@@ -12,8 +12,8 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
 - [Genotype call for RILs based on RNA-seq alignment](#Genotype-call-for-RILs-based-on-RNA-seq-alignment)
 - [Update GFF3 file for the reference genome](#Update-GFF3-file-for-the-reference-genome)
-- [Gene expression level quantification and differential gene expression analysis](#Gene-expression-level-quantification)
-- [Association analysis between genotype and gene expression](Association-analysis-between-genotype-and-gene-expression)
+- [Gene expression level quantification and differential gene expression analysis](#Gene-expression-level-quantification-and-differential-gene-expression-analysis)
+- [Association analysis between genotype and gene expression](#Association-analysis-between-genotype-and-gene-expression)
 - 
 
 ## Programs
@@ -23,6 +23,7 @@ eQTL is QTL explaining gene expression, can be identified via association analys
 - STAR v2.7.3a
 - GATK v4.0
 - GSNAP version 2020-06-30
+- htseq-count v2.0.1
 - 
 
 ## DNA-seq for variants calling
