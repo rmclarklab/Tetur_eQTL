@@ -207,29 +207,20 @@ rsem-calculate-expression --star-gzipped-read-file --paired-end --star --strande
 We employed DESeq2 for differential expression analysis.
 1. Prepare sample information for DESeq2 including conditions in contrast
 
-2. Perform differential expression analysis by assigning contrast conditions
+2. Perform differential expression analysis by assigning contrasted conditions for comparison
 ```bash
 
 ```
 
 ## Association analysis between genotype and gene expression
 For each samples, its genotype blocks and gene expression data are available.
-1. Merge htseq-count files for all samples into one single file
+1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium. For each gene, its expression levels across all samples fit normal distribution while the relative rankings also preserved.
 ```bash
-# make directory for htseq-count data of all samples
-mkdir htseq_count_dir
-# place all samples htseq-count output under the htseq_count_dir
-mv *.txt htseq_count_dir
-# To merge all counts with genes on rows and samples on columns
-htseq_merge.py -countdir htseq_count_dir -O all_sample_count
+For running script, see ```count_norm.R``` <br>
 ```
-2. Standarize read-count by performing library size normalization and quantile normalization. 
-
-Library size normalization was performed using [DESeq2](https://github.com/mikelove/DESeq2). For running script, see ```count_norm.R``` <br>
-
 [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
-3. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. For the identified genotype-blocks of each sample (output of genotype_block.py, see above), place all of samples in the same folder.
+2. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. For the identified genotype-blocks of each sample (output of genotype_block.py, see above), place all of samples in the same folder.
 ```bash
 # make directory for all samples' genotype block information
 mkdir sample_genotype_block
