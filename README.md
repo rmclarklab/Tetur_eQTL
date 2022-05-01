@@ -11,7 +11,8 @@ eQTL is QTL explaining gene expression, and it can be identified via association
 - [Map RNA-seq against the reference genome](#Map-RNA-seq-against-the-reference-genome)
 - [Genotype call for RILs based on RNA-seq alignment](#Genotype-call-for-RILs-based-on-RNA-seq-alignment)
 - [Update GFF3 file for the reference genome](#Update-GFF3-file-for-the-reference-genome)
-- [Gene expression level quantification and differential gene expression analysis](#Gene-expression-level-quantification-and-differential-gene-expression-analysis)
+- [Gene expression level quantification](#Gene-expression-level-quantification)
+- [Differential gene expression analysis](#Differential-gene-expression-analysis)
 - [Association analysis between genotype and gene expression](#Association-analysis-between-genotype-and-gene-expression)
 - 
 
@@ -167,7 +168,7 @@ Rscript block_vis.R -geno sample_genotype_block.txt
 <img width="300" alt="Screen Shot 2022-05-01 at 3 15 45 PM" src="https://user-images.githubusercontent.com/63678158/166165078-eaeace45-abfc-48ca-9301-684e0f670db4.png">
 
 ## Update GFF3 file for the reference genome
-To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from [Orcae database](https://bioinformatics.psb.ugent.be/gdb/tetranychus/) and updated the current GFF3 file. <br>
+To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from [Orcae database](https://bioinformatics.psb.ugent.be/gdb/tetranychus/) (version of 01252019) and updated the current GFF3 file. <br>
 To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```GFF_record.py``` under GFF_update folder. <br>
 Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
 Transform from GFF3 to GTF format using script ```gff2gtf.py``` under GFF_update folder. <br>
@@ -181,23 +182,36 @@ bgzip output.gff
 tabix -p gff output.gff.gz
 ```
 
-## Gene expression level quantification and differential gene expression analysis
+## Gene expression level quantification
 1. By taking the updated GFF version, we run htseq-count on the RNA-seq alignment BAM files and output read count on gene basis.
 ```bash
 # htseq-count command line (adjust number of CPU "-n" based on sample BAMs number, per BAM per CPU)
-htseq-count -r pos -s reverse -t exon -i gene_id --nonunique none --with-header -n 3 -c sample1_3.txt sample1.bam sample2.bam sample3.bam $GTF 
+htseq-count -r pos -s reverse -t exon -i gene_id --nonunique none --with-header -n 3 -c sample1-3.tsv sample1.bam sample2.bam sample3.bam $GTF 
 ```
-2. To calculate gene expression abundance on transcript per million (TPM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
+2. For absolute read-count from htseq-count output, we performed library-size normalization using DESeq2. <br>
+
+```bash 
+# assign multiple sample count files in -count argument, -O for output name
+Rscript DESeq2_norm.R -count sample1.tsv sample2.tsv sample3.tsv .... -O all_sample_normal
+```
+
+3. To calculate gene expression abundance on transcript per million (TPM) level and Fragments Per Kilobase of transcript per Million(FPKM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
 ```bash
 # prepare reference index for rsem expression calculation
 rsem-prepare-reference --gtf $GTF --star --star-sjdboverhang 150 $GENOME Tetur_rsem -p 20
 # calculate expression level using paired-end reads
 rsem-calculate-expression --star-gzipped-read-file --paired-end --star --strandedness reverse -p 10 r1.fastq.gz r2.fastq.gz Tetur_rsem sample_name
 ```
-3. Perform differential expression analysis by giving the sample information and conditions in comparison
+
+## Differential gene expression analysis
+We employed DESeq2 for differential expression analysis.
+1. Prepare sample information for DESeq2 including conditions in contrast
+
+2. Perform differential expression analysis by assigning contrast conditions
 ```bash
 
 ```
+
 ## Association analysis between genotype and gene expression
 For each samples, its genotype blocks and gene expression data are available.
 1. Merge htseq-count files for all samples into one single file
