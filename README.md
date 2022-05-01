@@ -167,10 +167,11 @@ Rscript block_vis.R -geno sample_genotype_block.txt
 <img width="300" alt="Screen Shot 2022-05-01 at 3 15 45 PM" src="https://user-images.githubusercontent.com/63678158/166165078-eaeace45-abfc-48ca-9301-684e0f670db4.png">
 
 ## Update GFF3 file for the reference genome
-To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from Orcae database and updated the current GFF3 file. <br>
-To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```restore_gff.py```. <br>
+To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from [Orcae database](https://bioinformatics.psb.ugent.be/gdb/tetranychus/) and updated the current GFF3 file. <br>
+To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```GFF_record.py``` under GFF_update folder. <br>
 Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
-Transform from GFF3 to GTF format using script ```gff2gtf.py```.
+Transform from GFF3 to GTF format using script ```gff2gtf.py``` under GFF_update folder. <br>
+To compress and add index for GFF/GTF, see below:
 ```bash
 # sort gff using gff3sort.pl
 gff3sort.pl input.gff > output.gff
