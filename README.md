@@ -1,10 +1,9 @@
 # Expression QTL (eQTL) of <i>Tetranychus urticae</i> (a generalist spider-mite herbivore)
 This is a repo for the data analysis pipeline of Tetranychus urticae eQTL project. </br>
-eQTL is QTL explaining gene expression, can be identified via association analysis between genotype and gene expression.
+eQTL is QTL explaining gene expression, and it can be identified via association analysis between genotype and gene expression.
 
-## eQTL Project introduction
-  To initiate eQTL project, we collected a total of 458 isogenic pools of the recombinant inbred lines (RIL). Briefly, a susceptible ROS-ITi (diploid mother, ♀) and more resistant MR-VPi (haploid father, ♂) inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi strain. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool. 
-  Because the recombination events happended during F1 reproducing F2 male, the  RILs have different genotypic compositions which provided the foundamental basis for eQTL analysis. RNA was extracted from individual RIL isogenic populations, which are used for genotyping and phenotyping (phenotype data is gene expression level, See below for detail). 
+## Experimental design
+  To initiate eQTL project, we collected a total of 458 isogenic pools of the recombinant inbred lines (RIL). Briefly, a susceptible ROS-ITi (diploid mother, ♀) and more resistant MR-VPi (haploid father, ♂) inbred strains are employed as the founder strains (F0). By crossing the two parental strains, we collected F1 female (diploid). And F1 female lay eggs without ferterlization developing into males (F2, haploid), which are back crossed to the susceptible ROS-ITi female. For each F2 male backcross, all offsprings are collected to generate one single isogenic pool for RNA-seq extraction. 
 
 ## Table of contents
 
@@ -129,7 +128,7 @@ gsnap -d GSNAP_index -N 1 -D . --gunzip -s Tu_splicesites -v SNP_allele -t 20 -A
 ## Genotype call for RILs based on RNA-seq alignment
 We developed a customized pipeline for genotyping purposes of RIL isogenic pools. 
 Inputs:
-  - BAM file in coordinates sorted fashion and with its index file;
+  - BAM file of RILs in coordinates sorted fashion and with its index file;
   - SNPs information that are distinguishable between the two inbred stains (output of vcf_compare.py, see above).
 
 1. Count allele-specific reads on SNP sites for each sample separately
@@ -146,7 +145,7 @@ After running for all samples, place all of them in the same folder (raw_count).
 # this is a multiple-core processing program, adjust core usage via "-n"
 mpiexec -n 10 genotype_freq.py -dir raw_count -O SNP_geno_freq
 ```
-3. A backcrossing experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
+3. A backcross experimental design indicates a 1:1 ratio of heterozygous:homozygous genotype at each SNP site. We performed Chi-square goodness of fit test to filter bad SNP sites which doesn't fit the ratio (adjusted p < 0.01). <br>
 
     See ```chisq_bad.Rmd```
 
@@ -165,6 +164,7 @@ genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.t
 ```bash
 Rscript block_vis.R -geno sample_genotype_block.txt
 ```
+<img width="500" alt="Screen Shot 2022-05-01 at 3 15 45 PM" src="https://user-images.githubusercontent.com/63678158/166165078-eaeace45-abfc-48ca-9301-684e0f670db4.png">
 
 ## Update GFF3 file for the reference genome
 To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from Orcae database and updated the current GFF3 file. <br>
