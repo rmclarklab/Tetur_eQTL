@@ -182,7 +182,6 @@ bgzip output.gff
 # add index for compressed gff
 tabix -p gff output.gff.gz
 ```
-
 ## Gene expression level quantification
 1. By taking the updated GFF version, we run htseq-count on the RNA-seq alignment BAM files and output read count on gene basis.
 ```bash
@@ -191,21 +190,22 @@ htseq-count -r pos -s reverse -t exon -i gene_id --nonunique none --with-header 
 ```
 2. For absolute read-count from htseq-count output, we performed library-size normalization using DESeq2 (under normalization folder). <br>
 ```bash 
-# assign htseq-count of all samples in -count argument, -O for output name
+# merge htseq-count output of all samples into one file, -O for output name
 Rscript DESeq2_norm.R -count all_sample.txt -O all_sample_normalizedbyDESeq2
 ```
-3. To calculate gene expression abundance on transcript per million (TPM) level and Fragments Per Kilobase of transcript per Million(FPKM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
+3. To calculate gene expression abundance on transcript per million (TPM) level and Fragments Per Kilobase of transcript per Million (FPKM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
 ```bash
 # prepare reference index for rsem expression calculation
 rsem-prepare-reference --gtf $GTF --star --star-sjdboverhang 150 $GENOME Tetur_rsem -p 20
 # calculate expression level using paired-end reads
 rsem-calculate-expression --star-gzipped-read-file --paired-end --star --strandedness reverse -p 10 r1.fastq.gz r2.fastq.gz Tetur_rsem sample_name
 ```
-
 ## Differential gene expression analysis
 We employed DESeq2 for differential expression analysis.
 1. Prepare sample information for DESeq2 including conditions in contrast
+```bash
 
+```
 2. Perform differential expression analysis by assigning contrasted conditions for comparison
 ```bash
 
