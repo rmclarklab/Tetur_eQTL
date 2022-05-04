@@ -165,6 +165,7 @@ genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.t
 ```bash
 Rscript block_vis.R -geno sample_genotype_block.txt
 ```
+Example output (in PDF): <br>
 <img width="300" alt="Screen Shot 2022-05-01 at 3 15 45 PM" src="https://user-images.githubusercontent.com/63678158/166165078-eaeace45-abfc-48ca-9301-684e0f670db4.png">
 
 ## Update GFF3 file for the reference genome
