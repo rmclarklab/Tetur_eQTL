@@ -189,13 +189,11 @@ tabix -p gff output.gff.gz
 # htseq-count command line (adjust number of CPU "-n" based on sample BAMs number, per BAM per CPU)
 htseq-count -r pos -s reverse -t exon -i gene_id --nonunique none --with-header -n 3 -c sample1-3.tsv sample1.bam sample2.bam sample3.bam $GTF 
 ```
-2. For absolute read-count from htseq-count output, we performed library-size normalization using DESeq2. <br>
-
+2. For absolute read-count from htseq-count output, we performed library-size normalization using DESeq2 (under normalization folder). <br>
 ```bash 
-# assign multiple sample count files in -count argument, -O for output name
-Rscript DESeq2_norm.R -count sample1.tsv sample2.tsv sample3.tsv .... -O all_sample_normal
+# assign htseq-count of all samples in -count argument, -O for output name
+Rscript DESeq2_norm.R -count all_sample.txt -O all_sample_normalizedbyDESeq2
 ```
-
 3. To calculate gene expression abundance on transcript per million (TPM) level and Fragments Per Kilobase of transcript per Million(FPKM) level, we run [RSEM](https://github.com/deweylab/RSEM). 
 ```bash
 # prepare reference index for rsem expression calculation
@@ -212,10 +210,9 @@ We employed DESeq2 for differential expression analysis.
 ```bash
 
 ```
-
 ## Association analysis between genotype and gene expression
-For each samples, its genotype blocks and gene expression data are available.
-1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium. For each gene, its expression levels across all samples fit normal distribution while the relative rankings also preserved.
+For each sample, its genotype blocks and gene expression data are available.
+1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium (see also [here]()). For each gene, its expression levels across all samples fit normal distribution while the relative rankings also preserved.
 ```bash
 For running script, see ```count_norm.R``` <br>
 ```
