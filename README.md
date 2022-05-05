@@ -165,15 +165,15 @@ genotype_block.py -chr chr.txt -chrLen chrlen.txt -C sample_allele_count.clean.t
 ```bash
 Rscript block_vis.R -geno sample_genotype_block.txt
 ```
-Example output (in PDF): <br>
+  Example output (in PDF): <br>
 <img width="300" alt="Screen Shot 2022-05-01 at 3 15 45 PM" src="https://user-images.githubusercontent.com/63678158/166165078-eaeace45-abfc-48ca-9301-684e0f670db4.png">
 
 ## Update GFF3 file for the reference genome
-To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from [Orcae database](https://bioinformatics.psb.ugent.be/gdb/tetranychus/) (version of 01252019) and updated the current GFF3 file. <br>
-To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```GFF_record.py``` under GFF_update folder. <br>
-Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
-Transform from GFF3 to GTF format using script ```gff2gtf.py``` under GFF_update folder. <br>
-To compress and add index for GFF/GTF, see below:
+  To integrate all annotated gene information in the current three-chromosome reference genome, we added gene models from [Orcae database](https://bioinformatics.psb.ugent.be/gdb/tetranychus/) (version of 01252019) and updated the current GFF3 file. <br>
+  To transfer gene models on fragmented scaffold genomes onto three-chromosome genome scale, see script ```GFF_record.py``` under GFF_update folder. <br>
+  Combine the added gene models to the current GFF3 file and sort it using [gff3sort.pl](https://github.com/billzt/gff3sort). <br>
+  Transform from GFF3 to GTF format using script ```gff2gtf.py``` under GFF_update folder. <br>
+  To compress and add index for GFF/GTF, see below:
 ```bash
 # sort gff using gff3sort.pl
 gff3sort.pl input.gff > output.gff
@@ -211,13 +211,13 @@ We employed DESeq2 for differential expression analysis.
 
 ```
 ## Association analysis between genotype and gene expression
-For each sample, its genotype blocks and gene expression data are available.
+  For each sample, its genotype blocks and gene expression data are available.
 1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization on gene expression data, an accepted remedy by the GTEx consortium (see also [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/faq.html)). The normalization is on individual gene level, and gene expression quantity across all samples fit normal distribution while preserving the relative rankings. Run quantile_norm.R (under normalization folder):
 ```bash 
 # input count file should be normalized by library-size (see Gene expression level quantification 2)
 Rscript quantile_norm.R -norm_count all_sample_normalizedbyDESeq2 -O all_sample_quantile_normalization
 ``` 
-[NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
+  [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
 2. To alleviate computational pressure for association tests that run for each combination of SNP genotype and individual gene expression level, we assigned genotype bins based on the overlap of genotype blocks among isogenic populations. 
 ```bash
@@ -230,7 +230,7 @@ mv sample_genotype_block*.txt sample_genotype_block/
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
 3. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
-About how to prepare input files for MatrixeQTL, see its tutorial [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/runit.html).
+  About how to prepare input files for MatrixeQTL, see its tutorial [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/runit.html).
 ```bash 
 # command for using MatrixeQTL for association test (without taking gene/SNP location information)
 # both ANOVA and LINEAR models are used for the association analysis, and output files in *.anova.txt and *.linear.txt
@@ -238,7 +238,7 @@ Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -O
 ```
 4. Significant associations can arise from linkage disequilibruim (LD). To alleviate its effect, we take the bin genotype data to reconstruct linkage groups using [R/qtl](https://rqtl.org/download/). <br>
 
-For linkage group construction, see R script ```marker_association.R```
+  For linkage group construction, see R script ```marker_association.R```
 
 5. Based on the linkage group information, we parsed significant associations for each bin and its target gene. The most significant bin of a given linkage group was chosen as the "causal" eQTL. 
 ```bash
