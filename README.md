@@ -217,7 +217,7 @@ We employed DESeq2 for differential expression analysis.
 # input count file should be normalized by library-size (see Gene expression level quantification 2)
 Rscript quantile_norm.R -norm_count all_sample_normalizedbyDESeq2 -O all_sample_quantile_normalization
 ``` 
-  [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
+    [Notice] Genes with absolute (raw) read-count<10 in more than 80% samples of the whole population are considered to be very lowly expressed and filtered out from further analysis.
 
 2. To alleviate computational pressure for association tests that run for each combination of SNP genotype and individual gene expression level, we assigned genotype bins based on the overlap of genotype blocks among isogenic populations. 
 ```bash
