@@ -226,17 +226,17 @@ mkdir sample_genotype_block
 # move genotype_block information (output from genotype_block.py) to the directory
 mv sample_genotype_block*.txt sample_genotype_block/
 # run block2bin.R to assign genotypic bins based on overlapped blocks 
-# for this step, you need also to provide chromosome length information (chrlen.txt) and SNP position file (SNP_loc.txt)
+# for this step, you also need to provide chromosome length information (chrlen.txt) and SNP position file (SNP_loc.txt)
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
 3. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
 About how to prepare input files for MatrixeQTL, see its tutorial [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/runit.html).
 ```bash 
 # command for using MatrixeQTL for association test (without taking gene/SNP location information)
-Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -p 1e-4 -O <out>
+# both ANOVA and LINEAR models are used for the association analysis, and output files in *.anova.txt and *.linear.txt
+Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -O <output>
 ```
-
-5. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
+4. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
 First, we need to generate the a linkage measure for each bin to bin. 
 Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
