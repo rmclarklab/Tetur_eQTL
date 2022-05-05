@@ -243,7 +243,7 @@ Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -O
 5. Based on the linkage group information, we parsed significant associations for each bin and its target gene. The most significant bin of a given linkage group was chosen as the "causal" eQTL. 
 ```bash
 # use the developed script parse_eQTL.py (support multiple-core running, adjust core usage in "-n")
-mpiexec -n 5 parse_eQTL.py -eQTL MatrixeQTL_output -assoc marker_association.txt -O parsed_eQTL
+mpiexec -n 5 eQTL_parse.py -eQTL MatrixeQTL_output -assoc marker_association.txt -O parsed_eQTL
 # the marker_association.txt is output from the last step 
 ```
 ## Allele-specific expression for determination of <i>cis</i>-distance 
