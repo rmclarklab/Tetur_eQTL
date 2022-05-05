@@ -219,24 +219,25 @@ Rscript quantile_norm.R -norm_count all_sample_normalizedbyDESeq2 -O all_sample_
 ``` 
 [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
-2. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. For the identified genotype-blocks of each sample (output of genotype_block.py, see above), place all of samples in the same folder.
+2. To alleviate computational pressure for association tests that run for each combination of SNP genotype and individual gene expression level, we assigned genotype bins based on the overlap of genotype blocks among isogenic populations. 
 ```bash
-# make directory for all samples' genotype block information
+# make a directory to store all samples' genotype block information
 mkdir sample_genotype_block
-# move genotype_block to the directory
+# move genotype_block information (output from genotype_block.py) to the directory
 mv sample_genotype_block*.txt sample_genotype_block/
-# prepare SNP location file for bin assignment (if no SNPs in one overlapped region, no bins assigned)
-
-# run block2bin.R to pick the representative SNPs of each overlapped blocks
+# run block2bin.R to assign genotypic bins based on overlapped blocks 
+# for this step, you need also to provide chromosome length information (chrlen.txt) and SNP position file (SNP_loc.txt)
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
 4. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
-Commanda used for association analysis, please see ```teset```
+```bash 
+# command for using MatrixeQTL for association test
+
+```
 
 5. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
 
 First, we need to generate the a linkage measure for each bin to bin. 
 Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
-
 
 
