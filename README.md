@@ -230,9 +230,10 @@ mv sample_genotype_block*.txt sample_genotype_block/
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
 3. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
+About how to prepare input files for MatrixeQTL, see its tutorial [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/runit.html).
 ```bash 
-# command for using MatrixeQTL for association test
-
+# command for using MatrixeQTL for association test (without taking gene/SNP location information)
+Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -p 1e-4 -O <out>
 ```
 
 5. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
