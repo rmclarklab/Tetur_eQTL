@@ -212,7 +212,7 @@ We employed DESeq2 for differential expression analysis.
 ```
 ## Association analysis between genotype and gene expression
 For each sample, its genotype blocks and gene expression data are available.
-1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium (see also [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/faq.html)). The normalization is on individual gene level, and gene expression quantity across all samples fit normal distribution while preserving the relative rankings. Run quantile_norm.R (under normalization folder):
+1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization on gene expression data, an accepted remedy by the GTEx consortium (see also [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/faq.html)). The normalization is on individual gene level, and gene expression quantity across all samples fit normal distribution while preserving the relative rankings. Run quantile_norm.R (under normalization folder):
 ```bash 
 # input count file should be normalized by library-size (see Gene expression level quantification 2)
 Rscript quantile_norm.R -norm_count all_sample_normalizedbyDESeq2 -O all_sample_quantile_normalization
