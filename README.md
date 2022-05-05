@@ -229,7 +229,7 @@ mv sample_genotype_block*.txt sample_genotype_block/
 # for this step, you need also to provide chromosome length information (chrlen.txt) and SNP position file (SNP_loc.txt)
 Rscript block2bin.R -genodir sample_genotype_block/ -chrLen chrlen.txt -SNP SNP_loc.txt
 ```
-4. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
+3. Perform genotype-expression association analysis using [MatrixeQTL](https://github.com/andreyshabalin/MatrixEQTL). <br>
 ```bash 
 # command for using MatrixeQTL for association test
 
