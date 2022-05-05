@@ -212,10 +212,11 @@ We employed DESeq2 for differential expression analysis.
 ```
 ## Association analysis between genotype and gene expression
 For each sample, its genotype blocks and gene expression data are available.
-1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium (see also [here]()). For each gene, its expression levels across all samples fit normal distribution while the relative rankings also preserved.
-```bash
-For running script, see ```count_norm.R``` <br>
-```
+1. To alleviate the effects from outlier expression data and alleviate systematic inflation problem, we performed quantile normalization, an accepted remedy by the GTEx consortium (see also [here](http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/faq.html)). The normalization is on individual gene level, and gene expression quantity across all samples fit normal distribution while preserving the relative rankings. Run quantile_norm.R (under normalization folder):
+```bash 
+# input count file should be normalized by library-size (see Gene expression level quantification 2)
+Rscript quantile_norm.R -norm_count all_sample_normalizedbyDESeq2 -O all_sample_quantile_normalization
+``` 
 [NOTE]Genes with absolute read-count less than 10 in more than 80% of the samples are considered to be very lowly expressed and filtered out from further analysis.
 
 2. To alleviate computational pressure of association tests for each combination of SNP genotype and individual gene expression level, we identified genotype bins based on the overlap of genotype blocks among isogenic populations. For the identified genotype-blocks of each sample (output of genotype_block.py, see above), place all of samples in the same folder.
