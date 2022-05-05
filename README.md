@@ -25,7 +25,7 @@ eQTL is QTL explaining gene expression, and it can be identified via association
 - GSNAP version 2020-06-30
 - htseq-count v2.0.1
 - RSEM v1.3.3
-- R v4.1.3 (packages: DESeq2 v1.34; MatrixEQTL v2.3; R/qtl v1.50; )
+- R v4.1.3 (packages: DESeq2 v1.34; MatrixEQTL v2.3; R/qtl v1.46; )
 - 
 
 ## DNA-seq for variants calling
@@ -236,11 +236,14 @@ About how to prepare input files for MatrixeQTL, see its tutorial [here](http://
 # both ANOVA and LINEAR models are used for the association analysis, and output files in *.anova.txt and *.linear.txt
 Rscript eQTL_identify.R -genotype <genotype.txt> -expression <expression.txt> -O <output>
 ```
-4. Significant associations can arise from linkage disequilibruim (LD). To alleviate its effect, we used the bin genotype data to reconstruct 
+4. Significant associations can arise from linkage disequilibruim (LD). To alleviate its effect, we take the bin genotype data to reconstruct linkage groups using [R/qtl](https://rqtl.org/download/). <br>
 
-5. For any significant associations, recombination bins that are physically linked to each other are all passed the significance cutoff. To eliminate the issue arising from linkage disequilibruim (LD), we rebuild the linkage groups based on the bin genotype and then extracted the most significant association(s) between individual gene and its peak eQTL. 
+For linkage group construction, see R script ```marker_association.R```
 
-First, we need to generate the a linkage measure for each bin to bin. 
-Then, we developed a customized script to screening the output of MatrixeQTL. When one gene expression is associated with multiple recombination bins that belonged to one single linkage group, we only use the most significant association as the informative one. 
+5. Based on the linkage group information, we parsed significant associations for each bin and its target gene. The most significant bin of a given linkage group was chosen as the "causal" eQTL. 
+```bash
+
+```
+
 
 
