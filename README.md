@@ -28,6 +28,8 @@ eQTL is QTL explaining gene expression, and it can be identified via association
 - R v4.1.3 (packages: DESeq2 v1.34; MatrixEQTL v2.3; R/qtl v1.46; )
 - 
 
+[NOTE]To enable parallel processing, python model mpi4py need to be installed. 
+
 ## DNA-seq for variants calling
 To call variants for the inbred ROS-ITi and MR-VPi strains, we mapped illumina DNA-seq against the three-chromosome reference genome (London strain, see [Wybouw, Kosterlitz, et al., 2019](https://academic.oup.com/genetics/article/211/4/1409/5931522)). <br>
 GATK best practice for variants calling is refered [here](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows). <br>
