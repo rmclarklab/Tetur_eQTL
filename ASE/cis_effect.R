@@ -3,8 +3,8 @@ suppressMessages(library("argparse"))
 
 parse_arg <- function() {
     # accept arguments from terminal
-    parser <- ArgumentParser(description = "Usage: Rscript cis_effect.R -ASE <ASE.txt> -O <prefix> ")
-    parser$add_argument("-ASE", "--ASE", help = "Allele-specific expression on gene-basis for all sample. ")
+    parser <- ArgumentParser(description = "Usage: Rscript cis_effect.R -ASE <ASE.txt> -remove_homo -O <prefix> ")
+    parser$add_argument("-ASE", "--ASE", help = "Allele-specific count on gene-basis for all sample. ")
     parser$add_argument("-remove_homo", "--remove_homo", action = "store_true", help = "Remove genes within homozygous genotype region. ")
     parser$add_argument("-O", "--output", help = "the prefix for the output name.")
     parser$parse_args()
