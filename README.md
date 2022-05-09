@@ -14,6 +14,7 @@ eQTL is QTL explaining gene expression, and it can be identified via association
 - [Gene expression level quantification](#Gene-expression-level-quantification)
 - [Differential gene expression analysis](#Differential-gene-expression-analysis)
 - [Association analysis between genotype and gene expression](#Association-analysis-between-genotype-and-gene-expression)
+- [Allele-specific expression for determination of <i>cis</i>-distance](#Allele-specific-expression-for-determination-of-cis-distance)
 - 
 
 ## Programs
@@ -258,5 +259,15 @@ One character that distinguish of cis from trans-regulatory element is the biase
 # run ASE_gene.py for allelic expression on individual gene (multi-core process, adjust core usage in "-n") by taking GTF and RNA-alignment BAM file
 mpiexec -n 10 python ASE_gene.py -SNP SNP_exon.txt -gtf $GTF -bam $bam -O output
 ```
+2. By taking gene ASE count and genotype file for individual isogenic population, only genes on heterozygous regions are informative for following analysis. 
+```bash 
+# you should prepare all samples' ASE files under one directory and all samples' genotype files under one directory, and also provide gene coordinate information as input to take genes' ASE within heterzygous region for following analysis.
+python ASE_cis.py -countdir <ASE_dir> -genodir <geno_dir> -gene <gene_loc> -O output
+```
+3. 
+
+
+
+
 
 
