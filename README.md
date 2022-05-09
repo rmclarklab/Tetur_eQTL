@@ -250,5 +250,13 @@ mpiexec -n 5 eQTL_parse.py -eQTL MatrixeQTL_output -assoc marker_association.txt
 ```
 ## Allele-specific expression for determination of <i>cis</i>-distance 
 
-One character that distinguish of cis from trans-regulatory element is the biased allele-specific expression arising from cis control.  
+One character that distinguish of cis from trans-regulatory element is the biased allele-specific expression (ASE) arising from cis control. To take that into consideration for our assignment of cis/trans, we performed ASE on gene basis.
+
+1. Based on the SNP information on gene exon region, we count reads for allelic expression. 
+```bash
+# Prepare a file with all SNP data on exon region (example see data/SNP_exon.txt)
+# run ASE_gene.py for allelic expression on individual gene (multi-core process, adjust core usage in "-n") by taking GTF and RNA-alignment BAM file
+mpiexec -n 10 python ASE_gene.py -SNP SNP_exon.txt -gtf $GTF -bam $bam -O output
+```
+
 
