@@ -259,12 +259,18 @@ One character that distinguish of cis from trans-regulatory element is the biase
 # run ASE_gene.py for allelic expression on individual gene (multi-core process, adjust core usage in "-n") by taking GTF and RNA-alignment BAM file
 mpiexec -n 10 python ASE_gene.py -SNP SNP_exon.txt -gtf $GTF -bam $bam -O output
 ```
-2. By taking gene ASE count and genotype file for individual isogenic population, only genes on heterozygous regions are informative for following analysis. 
+2. By taking gene allele-specific count and genotype file for individual isogenic population, only genes on heterozygous regions are informative for following analysis. 
 ```bash 
 # you should prepare all samples' ASE files under one directory and all samples' genotype files under one directory, and also provide gene coordinate information as input to take genes' ASE within heterzygous region for following analysis.
 python ASE_cis.py -countdir <ASE_dir> -genodir <geno_dir> -gene <gene_loc> -O output
 ```
-3. 
+3. By taking allele-specific count of all samples (on heterozygous region, from last step), ASE ratio (log2 transformed) was calculated on gene-basis. Student's t-test was performed to test if significant bias in ASE was observed that can arised from cis-regulatory control. 
+```bash 
+Rscript cis_effect.R -ASE <ASE> -remove_homo -O output
+```
+4. 
+
+
 
 
 
