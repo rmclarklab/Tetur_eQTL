@@ -250,4 +250,5 @@ mpiexec -n 5 eQTL_parse.py -eQTL MatrixeQTL_output -assoc marker_association.txt
 ```
 ## Allele-specific expression for determination of <i>cis</i>-distance 
 
+One character that distinguish of cis from trans-regulatory element is the biased allele-specific expression arising from cis control.  
 
