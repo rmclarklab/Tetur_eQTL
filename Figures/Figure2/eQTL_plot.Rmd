@@ -379,21 +379,3 @@ effect_detox_p <- ggplot(data = effect_detox, aes(x = label, y = beta)) + geom_h
 ggsave(plot = effect_all_p, filename = "plot/effect_all.pdf", width = 4, height = 3)
 ggsave(plot = effect_detox_p, filename = "plot/effect_detox.pdf", width = 4, height = 3)
 ```
-
-done
-
-hotspot chr1 target genes examine for report
-```{r}
-eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label_exp.anova.parsed.1e-4.txt", sep = "\t", header = T)
-hot_trans <- eQTL_df[eQTL_df$label == "trans" & eQTL_df$bin_chromosome == "chromosome_1" & eQTL_df$bin_position > 12.4e+6 & eQTL_df$bin_position < 12.6e+6, ]
-hot_gene <- eQTL_df[eQTL_df$gene %in% hot_trans$gene, ]
-hot_gene_freq <- as.data.frame(table(hot_gene$gene))
-colnames(hot_gene_freq) <- c("gene", "freq")
-hot_gene_freq$label <- NULL
-for (g in hot_gene_freq[, "gene"]) {
-  g_label <- paste(hot_gene[hot_gene$gene == g, "label"], collapse = ",")
-  hot_gene_freq[hot_gene_freq$gene == g, "label"] <- g_label
-}
-write.table(hot_gene_freq, file = "output/hotspot_chr1_eQTLs.txt", sep = "\t", quote = F, row.names = F)
-```
-
