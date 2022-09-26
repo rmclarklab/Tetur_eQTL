@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Figure4 RNAi"
 output: html_notebook
 ---
 
@@ -259,11 +259,3 @@ detox <- read.table("../data_important/detox_RC.txt", sep = "\t", header = T)
 bean_sub <- bean[rownames(bean) %in% eQTL$gene, ]
 bean_detox <- bean[rownames(bean) %in% detox$gene, ]
 ```
-
-done
-
-```{r}
-mat = readRDS(system.file("extdata", "measles.rds", package = "ComplexHeatmap"))
-
-```
-
