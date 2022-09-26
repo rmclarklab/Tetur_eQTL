@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Figure3 NILs"
 output: html_notebook
 ---
 
@@ -187,5 +187,3 @@ C_inh <- merge(C_F1, F1_C_inheritance[, c("C.label", "C.category")], by.x = "Row
 AC_inheritance <- merge(A_inh, C_inh, by = "Row.names")
 write.table(AC_inheritance, file = "output/NIL_F1_inheritance.txt", quote = F, row.names = F, sep = "\t")
 ```
-
-done
