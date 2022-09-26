@@ -1,0 +1,399 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+suppressMessages(library("ggplot2"))
+suppressMessages(library("ggnewscale"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("gridExtra"))
+suppressMessages(library("reshape2"))
+suppressMessages(library("qtl"))
+suppressMessages(library("tidyr"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("ggbeeswarm"))
+suppressMessages(library("RColorBrewer"))
+suppressMessages(library("ggrepel"))
+suppressMessages(library("nVennR"))
+suppressMessages(library("VennDiagram"))
+```
+
+Function to report the frequency of position within some sliding window and step size
+```{r}
+# df should have chromosome/position columns; chrlen should have be a dataframe)
+sliding_win <- function(df, win, sliding, chrlen) {
+  chrs <- sort(unique(df$chromosome))
+  step <- ceiling(win*sliding)
+  pos_freq_chr <- list()
+  for (chr in chrs) {
+    sub_df <- df[df$chromosome == chr, ]
+    chr_len <- chrlen[chrlen$chromosome == chr, "length"]
+    numOfchunks <- ceiling((chr_len-win)/step)
+    pos_freq_df <- data.frame(chromosome = chr, bin = seq(0, numOfchunks, 1), win_start = seq(0, numOfchunks, 1), win_end = seq(0, numOfchunks, 1), freq = seq(0, numOfchunks, 1))
+    n <- 0
+    for (i in seq(0, numOfchunks*step, step)) {
+      sub_pos_count <- nrow(sub_df[(sub_df$position >= i) & (sub_df$position < i+win), ])
+      pos_freq_df[pos_freq_df$bin == n, "win_start"] <- i
+      pos_freq_df[pos_freq_df$bin == n, "win_end"] <- i + win
+      pos_freq_df[pos_freq_df$bin == n, "freq"] <- sub_pos_count
+      n <- n+1
+    }
+    pos_freq_chr[[chr]] <- pos_freq_df
+  }
+  
+  df <- do.call(rbind, pos_freq_chr)
+  return(df)
+}
+```
+
+prepare bin genotype for eQTL analysis
+```{r}
+# for each bin, use the start and end position as range name for eQTL bin
+geno_df <- read.table("data/bin_genotype.txt", sep = "\t", header = T)
+row.names(geno_df) <- paste0(geno_df$chromosome, ":", geno_df$bin_start, "-", geno_df$bin_end)
+bin_pos <- subset(geno_df, select = c(chromosome, bin_start, bin_end, position))
+write.table(bin_pos, file = "data/bin_position.txt", sep = "\t", quote = F, row.names = T)
+## 
+geno_df <- subset(geno_df, select = -c(chromosome, bin_start, bin_end, position))
+geno_df[geno_df == "-"] <- NA
+geno_df <- geno_df[rowMeans(!is.na(geno_df)) > 0, ]
+write.table(geno_df, file = "data/eQTL_genotype_all.txt", sep = "\t", quote = F, row.names = T)
+```
+
+based on the marker genotype to report the association for marker-by-marker (LOD and RF)
+```{r}
+genotype <- read.table("data/eQTL_genotype_all.txt", sep = "\t", header = T, row.names = 1)
+genotype <- ifelse(genotype == 0, "AA", "AB")
+genotype <- as.data.frame(genotype)
+samples <- colnames(genotype)
+genotype$chr <- "un"
+genotype <- genotype[, c("chr", samples)]
+# re-format genotype_bin file as a transposed csv format
+genotype.t <- t(as.matrix(genotype))
+genotype.t <- as.data.frame(genotype.t)
+# write.csv(genotype.t, file = "data/genotype_bin_t.csv", quote = F, row.names = T)
+# need to manually delete the chr row name in text file
+mapthis <- read.cross("csv", file = "data/genotype_bin_t.csv", genotypes = c("AA", "AB"), alleles = c("A", "B"), estimate.map = F, crosstype = 'bc')
+# summary(mapthis)
+# estimate recombination fraction between all pairs of genetic markers
+rf <- est.rf(mapthis)
+# pull out recombination fraction as calculated by est.rf
+rf.rf <- pull.rf(rf, what = "rf")
+# pull out LOD scores as calculated by est.rf
+rf.lod <- pull.rf(rf, what = "lod")
+prf <- as.data.frame(rf.rf)
+plod <- as.data.frame(rf.lod)
+prf['marker1'] <- rownames(prf)
+rf.melt <- melt(prf, id = c("marker1"), na.rm = T)
+colnames(rf.melt) <- c("marker1", "marker2", "rf")
+plod['marker1'] <- rownames(plod)
+lod.melt <- melt(plod, id = c("marker1"), na.rm = T)
+colnames(lod.melt) <- c("marker1", "marker2", "LOD")
+marker_asso <- merge(rf.melt, lod.melt, by = c("marker1", "marker2"))
+write.table(marker_asso, file = "data/marker_association.txt", sep = "\t", quote = F, row.names = F)
+```
+
+classify eQTLs into cis/trans based on the distance between eQTL and gene of 0.8 Mb
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq.anova.parsed.1e-4.txt", sep = "\t", header = T)
+linear_eQTL <- read.table("output/eQTL_nbin_nhtseq.linear.txt", sep = "\t", header = T)
+linear_eQTL_sub <- linear_eQTL[, c("SNP", "gene", "beta")]
+# add effect size of eQTL using linear model output
+eQTL_df_beta <- merge(eQTL_df, linear_eQTL_sub, by = c("SNP", "gene"), all.x = T)
+bin_pos <- read.table("data/bin_position.txt", sep = "\t", header = T, row.names = 1)
+colnames(bin_pos) <- c("bin_chromosome", "bin_start", "bin_end", "bin_position")
+gene_pos <- read.table("data/gene_loc_2022.txt", sep = "\t", header = T)
+gene_pos <- gene_pos[, c("gene", "chromosome", "start", "end", "strand")]
+colnames(gene_pos) <- c("gene", "gene_chromosome", "gene_start", "gene_end", "strand")
+# add bin and gene position
+eQTL_df_pos1 <- merge(eQTL_df_beta, bin_pos, by.x = "SNP", by.y = 0, all.x = T)
+eQTL_df_pos2 <- merge(eQTL_df_pos1, gene_pos, by = "gene", all.x = T)
+# add distance for gene and eQTL
+eQTL_df_pos2$distance <- ifelse(eQTL_df_pos2$bin_chromosome == eQTL_df_pos2$gene_chromosome, ifelse(eQTL_df_pos2$strand == "+", eQTL_df_pos2$bin_position - eQTL_df_pos2$gene_start, eQTL_df_pos2$bin_position - eQTL_df_pos2$gene_end), "-")
+# separate genes on scaffold (all label as eQTL, no discription)
+eQTL_pos <- eQTL_df_pos2[grepl("chromosome", eQTL_df_pos2$gene_chromosome), ]
+eQTL_pos_scaffold <- eQTL_df_pos2[!grepl("chromosome", eQTL_df_pos2$gene_chromosome), ]
+# when bin range overlapped with gene region, it is always cis-eQTL
+cis_distance <- 8e+5
+label <- c()
+for (i in seq(1, nrow(eQTL_pos))) {
+  dist <- eQTL_pos[i, "distance"]
+  if (dist != "-") {
+    bstart <- eQTL_pos[i, "bin_start"]
+    bend <- eQTL_pos[i, "bin_end"]
+    gstart <- eQTL_pos[i, "gene_start"]
+    gend <- eQTL_pos[i, "gene_end"]
+    overlap <- intersect(seq(bstart, bend), seq(gstart, gend))
+    if (length(overlap) > 0 | abs(as.numeric(dist)) < cis_distance) label <- c(label, "cis")
+    else label <- c(label, "trans")
+  } else label <- c(label, "trans")
+}
+eQTL_pos$label <- label
+eQTL_pos_scaffold$label <- "eQTL"
+eQTL_all <- rbind(eQTL_pos, eQTL_pos_scaffold)
+write.table(eQTL_all, file = "output/eQTL_nbin_nhtseq_label.anova.parsed.1e-4.txt", sep = "\t", quote = F, row.names = F)
+```
+
+add detox gene label to eQTL dataframe
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label.anova.parsed.1e-4.txt", sep = "\t", header = T)
+detox <- read.table("data/detox_RC.txt", sep = "\t", header = T)
+eQTL_df$gene_label <- ifelse(eQTL_df$gene %in% detox$gene, "detox", "non-detox")
+write.table(eQTL_df, file = "output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", quote = F, row.names = F)
+```
+
+number of genes trans-regulated by each window of eQTL (file)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_trans <- eQTL_df[eQTL_df$label == "trans", ]
+eQTL_trans <- eQTL_trans[, c("bin_chromosome", "bin_position")]
+colnames(eQTL_trans) <- c("chromosome", "position")
+chrlen <- read.table("data/chrlen.txt", sep = "\t", header = T)
+trans_freq <- sliding_win(eQTL_trans, 100000, 0.5, chrlen)
+write.table(trans_freq, file = "output/trans_eQTL_100k(0.5)_freq.txt", sep = "\t", quote = F, row.names = F)
+```
+
+number of detox genes trans-regulated by each window of eQTL (file)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_trans <- eQTL_df[eQTL_df$label == "trans", ]
+detox <- read.table("data/detox_RC.txt", sep = "\t", header = T)
+chrlen <- read.table("data/chrlen.txt", sep = "\t", header = T)
+detox_trans <- eQTL_trans[eQTL_trans$gene %in% detox$gene, ]
+detox_trans <- detox_trans[, c("bin_chromosome", "bin_position")]
+colnames(detox_trans) <- c("chromosome", "position")
+detox_freq <- sliding_win(detox_trans, 100000, 0.5, chrlen)
+write.table(detox_freq, file = "output/trans_eQTL_detox_100k(0.5)_freq.txt", sep = "\t", quote = F, row.names = F)
+```
+
+distance of cis-eQTL from gene (plot)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_cis <- eQTL_df[eQTL_df$label == "cis", ]
+cis_distance_p <- ggplot() + geom_histogram(data = eQTL_cis, aes(x = as.numeric(distance)), fill = "#2AAF7F", alpha = 0.8, color = "black", binwidth = 40000, size = 0.3) + xlab("cis-eQTL distance (kb)") + ylab("Frequency") + theme(panel.background = element_rect(fill = "transparent", color = "black"), panel.grid = element_blank())
+ggsave(plot = cis_distance_p, filename = "plot/cis_distance.pdf", width = 2.8, height = 2.5)
+```
+
+collect eQTLs for individual gene (file)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df_chr <- eQTL_df[eQTL_df$label %in% c("cis", "trans"), ]
+gid <- sort(unique(eQTL_df_chr$gene))
+gene_eQTL <- data.frame(gene = gid, eQTL = 0)
+for (g in gid) {
+  eQTL_g <- eQTL_df_chr[eQTL_df_chr$gene == g, ]
+  eQTL_l <- paste(sort(eQTL_g$label), collapse = ",")
+  gene_eQTL[gene_eQTL$gene == g, "eQTL"] <- eQTL_l
+}
+write.table(gene_eQTL, file = "output/gene_eQTLs.txt", sep = "\t", quote = F, row.names = F)
+```
+
+Frequency of genes with different cis or/and trans eQTLs combinations
+```{r}
+gene_eQTL <- read.table("output/gene_eQTLs.txt", sep = "\t", header = T)
+gene_eQTL_freq <- as.data.frame(table(gene_eQTL$eQTL))
+colnames(gene_eQTL_freq) <- c("eQTL_class", "freq")
+write.table(gene_eQTL_freq, file = "output/gene_eQTL_freq.txt", sep = "\t", quote = F, row.names = F)
+# single cis: 4035/5840 (69.1%)
+# single trans: 1114/5840 (19.1%)
+```
+
+detox gene cis and trans eQTLs 
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df_chr <- eQTL_df[eQTL_df$label %in% c("cis", "trans"), ]
+detox <- read.table("data/detox_RC.txt", sep = "\t", header = T)
+detox_eQTL <- eQTL_df_chr[eQTL_df_chr$gene %in% detox$gene, ]
+detox_gid <- sort(unique(detox_eQTL$gene))
+detox_df <- data.frame(gene = detox_gid, eQTL = 0)
+for (g in detox_gid) {
+  eQTL_g <- detox_eQTL[detox_eQTL$gene == g, ]
+  eQTL_l <- paste(sort(eQTL_g$label), collapse = ",")
+  detox_df[detox_df$gene == g, "eQTL"] <- eQTL_l
+}
+write.table(detox_df, file = "output/detox_eQTLs.txt", sep = "\t", quote = F, row.names = F)
+```
+
+frequency of detox gene with cis or/and trans combinations
+```{r}
+detox_df <- read.table("output/detox_eQTLs.txt", sep = "\t", header = T)
+detox_freq <- as.data.frame(table(detox_df$eQTL))
+colnames(detox_freq) <- c("eQTL_class", "freq")
+write.table(detox_freq, file = "output/detox_eQTL_freq.txt", sep = "\t", quote = F, row.names = F)
+```
+
+identify trans-eQTL hotspots regarding to the gene number under control of eQTL window
+```{r}
+trans_freq <- read.table("output/trans_eQTL_100k(0.5)_freq.txt", sep = "\t", header = T)
+hotchr1 <- trans_freq[trans_freq$chromosome == "chromosome_1", ]
+hotchr1 <- hotchr1[hotchr1$freq == max(hotchr1$freq), ]
+hotchr1_index <- as.numeric(rownames(hotchr1))
+hotchr1_df <- trans_freq[seq(hotchr1_index-1, hotchr1_index+1), ]
+# 
+hotchr2 <- trans_freq[trans_freq$chromosome == "chromosome_2", ]
+hotchr2 <- hotchr2[hotchr2$freq == max(hotchr2$freq), ]
+hotchr2_index <- as.numeric(rownames(hotchr2))
+hotchr2_df <- trans_freq[seq(hotchr2_index-1, hotchr2_index+1), ]
+# 
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_chr1 <- eQTL_df[eQTL_df$label == "trans" & eQTL_df$bin_chromosome == "chromosome_1" & eQTL_df$bin_position > 12.4e+6 & eQTL_df$bin_position < 12.6e+6, ]
+eQTL_chr2 <- eQTL_df[eQTL_df$label == "trans" & eQTL_df$bin_chromosome == "chromosome_2" & eQTL_df$bin_position > 2.8e+6 & eQTL_df$bin_position < 3.0e+6, ]
+chr1_num <- length(unique(eQTL_chr1$gene))
+chr2_num <- length(unique(eQTL_chr2$gene))
+chr1_gid <- as.data.frame(unique(eQTL_chr1$gene))
+colnames(chr1_gid) <- c("gene")
+colnames(chr2_gid) <- c("gene")
+chr2_gid <- as.data.frame(unique(eQTL_chr2$gene))
+write.table(eQTL_chr1, file = "output/chr1_12.4-12.6Mb.txt", sep = "\t", quote = F, row.names = F)
+write.table(eQTL_chr2, file = "output/chr2_2.8-3.0Mb.txt", sep = "\t", quote = F, row.names = F)
+write.table(chr1_gid, file = "output/chr1_12.4-12.6Mb_trans_gid.txt", sep = "\t", quote = F, row.names = F)
+write.table(chr2_gid, file = "output/chr2_2.8-3.0Mb_trans_gid.txt", sep = "\t", quote = F, row.names = F)
+# 
+bg_gid <- as.data.frame(unique(eQTL_df$gene))
+colnames(bg_gid) <- c("gene")
+write.table(bg_gid, file = "output/eQTL_gid.txt", sep = "\t", quote = F, row.names = F)
+```
+
+log2foldchange of genes in response to eQTL bin genotypes change (file)
+```{r}
+genotype_df <- read.table("data/eQTL_genotype_all.txt", sep = "\t", header = T, row.names = 1, )
+expression_df <- read.table("../data_important/htseq_star_new_v2_DESeq.txt", header = T, row.names = 1)
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df_association <- eQTL_df[, c("gene", "SNP")]
+# check expression and genotype data match
+# identical(colnames(genotype_df), colnames(expression_df))
+# go through each association by association
+eQTL_df_association$exp0 <- 0
+eQTL_df_association$exp1 <- 0
+for (a in rownames(eQTL_df_association)) {
+  gid <- eQTL_df_association[a, "gene"]
+  snp_id <- eQTL_df_association[a, "SNP"]
+  genotype_sub <- genotype_df[snp_id, ]
+  expression_sub <- expression_df[gid, ]
+  geno_exp <- rbind(genotype_sub, expression_sub)
+  geno_exp_t <- t(geno_exp)
+  colnames(geno_exp_t) <- c("genotype", "expression")
+  expression_mean <- geno_exp_t %>% as.data.frame() %>% group_by(genotype) %>% summarise(exp_mean=mean(expression)) %>% as.data.frame()
+  eQTL_df_association[eQTL_df_association$gene == gid & eQTL_df_association$SNP == snp_id, "exp0"] <- expression_mean[expression_mean$genotype == 0, "exp_mean"]
+  eQTL_df_association[eQTL_df_association$gene == gid & eQTL_df_association$SNP == snp_id, "exp1"] <- expression_mean[expression_mean$genotype == 1, "exp_mean"]
+}
+write.table(eQTL_df_association, file = "output/eQTL_gene_mean_exp.txt", sep = "\t", quote = F, row.names = F)
+eQTL_df <- merge(eQTL_df, eQTL_df_association, by = c("gene", "SNP"), all = T)
+write.table(eQTL_df, file = "output/eQTL_nbin_nhtseq_label_exp.anova.parsed.1e-4.txt", sep = "\t", quote = F, row.names = F)
+```
+
+effect-size (beta) for cis, trans, trans-hotspot1, trans-hotspot2 (all genes/detox genes)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df <- eQTL_df[eQTL_df$label %in% c("cis", "trans"), ]
+eQTL_chr1 <- read.table("output/chr1_12.4-12.6Mb.txt", sep = "\t", header = T)
+eQTL_chr2 <- read.table("output/chr2_2.8-3.0Mb.txt", sep = "\t", header = T)
+detox <- read.table("data/detox_RC.txt", sep = "\t", header = T)
+# 
+eQTL_df_detox <- eQTL_df[eQTL_df$gene %in% detox$gene, ]
+eQTL_chr1_detox <- eQTL_chr1[eQTL_chr1$gene %in% detox$gene, ]
+eQTL_chr2_detox <-eQTL_chr2[eQTL_chr2$gene %in% detox$gene, ]
+# 
+effect_size <- function(eQTL, label) {
+  ebeta <- eQTL$beta
+  beta_df <- data.frame(label = label, beta = ebeta)
+  return(beta_df)
+}
+# 
+cis <- effect_size(eQTL_df[eQTL_df$label == "cis", ], "cis")
+trans <- effect_size(eQTL_df[eQTL_df$label == "trans", ], "trans")
+detox_cis <- effect_size(eQTL_df_detox[eQTL_df_detox$label == "cis", ], "detox_cis") # cis in regulating detox genes
+detox_trans <- effect_size(eQTL_df_detox[eQTL_df_detox$label == "trans", ], "detox_trans") # trans in regulating detox genes
+chr1_effect <- effect_size(eQTL_chr1, "chr1")
+chr2_effect <- effect_size(eQTL_chr2, "chr2")
+detox_effect_chr1 <- effect_size(eQTL_chr1_detox, "detox_chr1")
+detox_effect_chr2 <- effect_size(eQTL_chr2_detox, "detox_chr2")
+# 
+effect_df <- rbind(cis, trans, detox_cis, detox_trans, chr1_effect, chr2_effect, detox_effect_chr1, detox_effect_chr2)
+write.table(effect_df, file = "output/effect_size.txt", sep = "\t", quote = F, row.names = F)
+```
+
+test if the biased directionality of effect in each of the cis, trans control
+```{r}
+effect_df <- read.table("output/effect_size.txt", sep = "\t", header = T)
+effect_label <- unique(effect_df$label)
+# 
+edf <- data.frame(effect = effect_label, average = 0, p = 0, df = 0)
+for (e in effect_label) {
+  effect_sub <- effect_df[effect_df$label == e, ]
+  t_res <- t.test(effect_sub$beta)
+  t_p <- t_res$p.value
+  t_mean <- t_res$estimate
+  t_df <- t_res$parameter
+  edf[edf$effect == e, "average"] <- t_mean
+  edf[edf$effect == e, "p"] <- t_p
+  edf[edf$effect == e, "df"] <- t_df
+}
+write.table(edf, file = "output/effect_t.test.txt", sep = "\t", quote = F, row.names = F)
+```
+
+scatter plot for eQTL and gene associations on genome-wide (plot)
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df_chr <- eQTL_df[grepl("chromosome", eQTL_df$gene_chromosome), ]
+eQTL_df_chr$color_label <- ifelse(eQTL_df_chr$gene_label == "detox", "detox", eQTL_df_chr$label)
+# order dataframe to control the rank/layer in plot
+eQTL_df_chr$color_label <- factor(eQTL_df_chr$color_label, levels = c("detox", "cis", "trans"))
+eQTL_df_chr <- eQTL_df_chr[order(eQTL_df_chr$color_label, decreasing = T), ] # always draw detox gene last (so on the top)
+eQTL_df_chr$gene_chromosome <- factor(eQTL_df_chr$gene_chromosome, levels = c("chromosome_3", "chromosome_2", "chromosome_1"))
+eQTL_df_chr$bin_chromosome <- factor(eQTL_df_chr$bin_chromosome, levels = c("chromosome_1", "chromosome_2", "chromosome_3"))
+# 
+eQTL_p <- ggplot(data = eQTL_df_chr, aes(x = bin_position, y = (gene_start+gene_end)%/%2, color = color_label, alpha = color_label, shape = color_label, size = color_label)) + facet_grid(gene_chromosome~bin_chromosome, scales = "fixed") + geom_point(stroke = 0.4) + scale_shape_manual(values = c("cis" = 1, "trans" = 1, "detox" = 1)) + scale_color_manual(values = c("cis"= "#2AAF7F", "trans" = "#B9D534", "detox" = "#30718F")) + scale_size_manual(values = c("cis" = 0.5, "trans" = 0.6, "detox" = 0.8)) + scale_alpha_manual(values = c("cis" = 0.5, "trans" = 1, "detox" = 1)) + theme(panel.background = element_rect(color = "grey", fill = "transparent")) + theme(legend.position = "top", legend.background = element_rect(fill = NA, color = "grey"), legend.box.background = element_rect(fill = "white", color = "grey"), axis.text = element_blank(), panel.grid = element_blank()) + theme(aspect.ratio = 1) + guides(color = guide_legend(override.aes = list(alpha = 1))) + scale_x_continuous(breaks = seq(0, max(eQTL_df_chr$bin_position), 5e+6)) + scale_y_continuous(breaks = seq(0, max(eQTL_df_chr$bin_position), 5e+6)) + xlab("eQTL position (Mb)") + ylab("gene position (Mb)")
+ggsave(plot = eQTL_p, filename = "plot/eQTL_nbin_nhtseq.pdf", width = 5.7, height = 5.7)
+```
+
+Number of genes regulated by trans-window and the significance on genome-wide (plot)
+```{r}
+trans_freq <- read.table("output/trans_eQTL_100k(0.5)_freq.txt", sep = "\t", header = T)
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label2.anova.parsed.1e-4.txt", sep = "\t", header = T)
+eQTL_df_trans <- eQTL_df[eQTL_df$label == "trans", ]
+eQTL_df_trans$color_label <- ifelse(eQTL_df_trans$gene_label == "detox", "detox", eQTL_df_trans$label)
+eQTL_df_trans$color_label <- factor(eQTL_df_trans$color_label, levels = c("detox", "trans"))
+eQTL_df_trans <- eQTL_df_trans[order(eQTL_df_trans$color_label, decreasing = T), ]
+eQTL_df_trans$chromosome <- eQTL_df_trans$bin_chromosome
+# 
+bg_p <- ggplot() + theme(panel.background = element_rect(color = "grey", fill = "transparent"), legend.position = "none", panel.grid = element_blank(), axis.text = element_blank()) 
+trans_sig_p <- bg_p + geom_point(data = eQTL_df_trans, aes(x = bin_position, y = -log10(FDR), color = color_label, shape = color_label), alpha = 1, size = 0.3, stroke = 0.4) + facet_wrap(~chromosome, scales = "fixed") + scale_color_manual(values = c("trans" = "#B9D534", "detox" = "#30718F")) + scale_shape_manual(values = c("trans" = 1, "detox" = 1)) + facet_wrap(~chromosome, scales = "fixed") + scale_x_continuous(breaks = seq(0, max(eQTL_df_trans$bin_position), 5000000)) + xlab("") + ylab("significance (-log10(FDR))")
+trans_freq_p <- bg_p + geom_line(data = trans_freq, aes(x = (win_start+win_end)/2, y = freq), size = 0.4, color = "#B9D534", alpha = 1) + facet_wrap(~chromosome, scales = "fixed") + scale_x_continuous(breaks = seq(0, max(eQTL_df_trans$bin_position), 5000000)) + xlab("eQTL position (Mb)") + ylab("number of trans regulated genes (100k)")
+ggsave(plot = trans_sig_p, filename = "plot/trans_sig.pdf", width = 5.5, height = 2)
+ggsave(plot = trans_freq_p, filename = "plot/trans_freq.pdf", width = 5.5, height = 1.6)
+```
+
+effect sizes of cis/trans eQTLs and hotspot on chr1 and chr2 (boxplot/violin)
+```{r}
+effect_df <- read.table("output/effect_size.txt", sep = "\t", header = T)
+effect_all <- effect_df[!grepl("detox", effect_df$label), ]
+effect_detox <- effect_df[grepl("detox", effect_df$label), ]
+effect_all$label <- factor(effect_all$label, levels = c("cis", "trans", "chr1", "chr2"))
+effect_detox$label <- factor(effect_detox$label, levels = c("detox_cis", "detox_trans", "detox_chr1", "detox_chr2"))
+# 
+effect_all_p <- ggplot(data = effect_all, aes(x = label, y = beta)) + geom_hline(yintercept = c(-1, 0, 1), color = "grey", size = 0.2, linetype = "dashed") + geom_violin(size = 0.1, width = 1.7, fill = "#FFEA46FF", alpha = 0.4) + geom_boxplot(size = 0.1, notch = T, outlier.size = 0.3, width = 0.23, color = "black", alpha = 0.3) + xlab("") + ylab("effect size") + theme(panel.background = element_rect(fill = "transparent", color = "grey"), panel.grid = element_blank())
+# 
+effect_detox_p <- ggplot(data = effect_detox, aes(x = label, y = beta)) + geom_hline(yintercept = c(-1, 0, 1), color = "grey", size = 0.2, linetype = "dashed") + geom_violin(size = 0.1, width = 1.7, fill = "#30718F", alpha = 0.4) + geom_boxplot(size = 0.1, notch = T, outlier.size = 0.3, width = 0.23, color = "black", alpha = 0.3) + xlab("") + ylab("effect size") + theme(panel.background = element_rect(fill = "transparent", color = "grey"), panel.grid = element_blank())
+ggsave(plot = effect_all_p, filename = "plot/effect_all.pdf", width = 4, height = 3)
+ggsave(plot = effect_detox_p, filename = "plot/effect_detox.pdf", width = 4, height = 3)
+```
+
+done
+
+hotspot chr1 target genes examine for report
+```{r}
+eQTL_df <- read.table("output/eQTL_nbin_nhtseq_label_exp.anova.parsed.1e-4.txt", sep = "\t", header = T)
+hot_trans <- eQTL_df[eQTL_df$label == "trans" & eQTL_df$bin_chromosome == "chromosome_1" & eQTL_df$bin_position > 12.4e+6 & eQTL_df$bin_position < 12.6e+6, ]
+hot_gene <- eQTL_df[eQTL_df$gene %in% hot_trans$gene, ]
+hot_gene_freq <- as.data.frame(table(hot_gene$gene))
+colnames(hot_gene_freq) <- c("gene", "freq")
+hot_gene_freq$label <- NULL
+for (g in hot_gene_freq[, "gene"]) {
+  g_label <- paste(hot_gene[hot_gene$gene == g, "label"], collapse = ",")
+  hot_gene_freq[hot_gene_freq$gene == g, "label"] <- g_label
+}
+write.table(hot_gene_freq, file = "output/hotspot_chr1_eQTLs.txt", sep = "\t", quote = F, row.names = F)
+```
+
