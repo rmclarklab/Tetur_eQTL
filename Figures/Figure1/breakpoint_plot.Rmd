@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Figure1 recombination events"
 output: html_notebook
 ---
 
@@ -240,9 +240,3 @@ colnames(bp_gene) <- c("bin", "chromosome", "win_start", "win_end", "bp_freq", "
 bp_p <- ggplot() + geom_point(data = bp_gene, aes(x = bp_freq, y = gene_freq), size = 0.4) + theme(panel.background = element_rect(fill = "transparent", color = "grey"), panel.grid = element_blank()) + xlab("breakpoint frequency (100k)") + ylab("transcribed gene frequency (100k)")
 ggsave(plot = bp_p, filename = "plot/breakpoint_gene_freq.pdf", width = 5, height = 5)
 ```
-
-
-```{r}
-
-```
-
